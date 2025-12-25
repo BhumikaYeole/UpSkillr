@@ -1,0 +1,647 @@
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { 
+  Mail, 
+  MapPin, 
+  Calendar, 
+  Edit2, 
+  BookOpen, 
+  Users, 
+  DollarSign,
+  Award,
+  TrendingUp,
+  Star,
+  Video,
+  Globe,
+  Linkedin,
+  Github,
+  Twitter,
+  CheckCircle,
+  Clock,
+  Target,
+  MessageSquare,
+  Download,
+  Share2,
+  Sparkles,
+  Zap,
+  Trophy
+} from "lucide-react";
+
+export default function InstructorProfile() {
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Dynamic instructor data - can be passed as props
+  const [instructorData, setInstructorData] = useState({
+    name: "John Doe",
+    role: "Instructor",
+    title: "Senior Full-Stack Developer & Educator",
+    email: "john.doe@example.com",
+    location: "San Francisco, CA",
+    joinedDate: "January 2024",
+    bio: "Passionate educator with 10+ years of industry experience. I love teaching and helping students achieve their career goals through practical, real-world projects.",
+    website: "johndoe.dev",
+    expertise: ["Web Development", "React", "Node.js", "Python", "System Design"],
+    totalCourses: 0,
+    totalStudents: 0,
+    totalRevenue: 0,
+    averageRating: 0,
+    totalReviews: 0,
+    teachingHours: 0,
+    responseTime: "2h",
+    languages: ["English", "Spanish"]
+  });
+
+  const [editForm, setEditForm] = useState(instructorData);
+
+  const handleEdit = () => {
+    setEditForm(instructorData);
+    setIsEditing(true);
+  };
+
+  const handleSave = () => {
+    setInstructorData(editForm);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditForm(instructorData);
+    setIsEditing(false);
+  };
+
+  const handleChange = (field, value) => {
+    setEditForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const achievements = [
+    { 
+      icon: BookOpen, 
+      title: "First Course", 
+      description: "Published your first course",
+      locked: true,
+      gradient: "from-blue-400 to-cyan-500"
+    },
+    { 
+      icon: Users, 
+      title: "100 Students", 
+      description: "Reached 100 students milestone",
+      locked: true,
+      gradient: "from-purple-400 to-pink-500"
+    },
+    { 
+      icon: Star, 
+      title: "5-Star Rating", 
+      description: "Achieved 5-star average rating",
+      locked: true,
+      gradient: "from-yellow-400 to-orange-500"
+    },
+    { 
+      icon: Trophy, 
+      title: "Top Instructor", 
+      description: "Became a top-rated instructor",
+      locked: true,
+      gradient: "from-green-400 to-emerald-500"
+    }
+  ];
+
+  const stats = [
+    {
+      icon: BookOpen,
+      label: "Total Courses",
+      value: instructorData.totalCourses,
+      color: "from-blue-400 to-cyan-500",
+      bgColor: "from-blue-50 to-cyan-50",
+      iconBg: "bg-blue-500"
+    },
+    {
+      icon: Users,
+      label: "Total Students",
+      value: instructorData.totalStudents.toLocaleString(),
+      color: "from-purple-400 to-pink-500",
+      bgColor: "from-purple-50 to-pink-50",
+      iconBg: "bg-purple-500"
+    },
+    {
+      icon: DollarSign,
+      label: "Total Revenue",
+      value: `$${instructorData.totalRevenue.toLocaleString()}`,
+      color: "from-green-400 to-emerald-500",
+      bgColor: "from-green-50 to-emerald-50",
+      iconBg: "bg-green-500"
+    },
+    {
+      icon: Star,
+      label: "Average Rating",
+      value: instructorData.averageRating > 0 ? instructorData.averageRating.toFixed(1) : "0.0",
+      color: "from-orange-400 to-yellow-500",
+      bgColor: "from-orange-50 to-yellow-50",
+      iconBg: "bg-orange-500"
+    }
+  ];
+
+  const socialLinks = [
+    { icon: Globe, label: "Website", value: instructorData.website, color: "from-blue-400 to-blue-600" },
+    { icon: Linkedin, label: "LinkedIn", value: "linkedin.com/in/johndoe", color: "from-blue-500 to-blue-700" },
+    { icon: Github, label: "GitHub", value: "github.com/johndoe", color: "from-gray-600 to-gray-800" },
+    { icon: Twitter, label: "Twitter", value: "@johndoe", color: "from-sky-400 to-blue-500" }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0e27] via-[#1a1f3a] to-[#0f1729] py-8 px-4 sm:px-6 lg:px-8">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        {/* Profile Header Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-2xl overflow-hidden mb-8"
+        >
+          {/* Cover Banner with Mesh Gradient */}
+          <div className="h-56 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 relative overflow-hidden">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLW9wYWNpdHk9IjAuMSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20"></div>
+            
+            {/* Floating particles effect */}
+            <div className="absolute top-10 left-10 w-2 h-2 bg-white rounded-full animate-ping"></div>
+            <div className="absolute top-20 right-20 w-2 h-2 bg-white rounded-full animate-ping" style={{animationDelay: '0.5s'}}></div>
+            <div className="absolute bottom-10 left-1/3 w-2 h-2 bg-white rounded-full animate-ping" style={{animationDelay: '1s'}}></div>
+            
+            <div className="absolute top-6 right-6 flex gap-3">
+              <motion.button
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-6 py-3 bg-white/20 backdrop-blur-xl rounded-2xl text-white font-semibold hover:bg-white/30 transition-all flex items-center gap-2 shadow-lg border border-white/30"
+              >
+                <Share2 className="w-4 h-4" />
+                Share
+              </motion.button>
+            </div>
+          </div>
+
+          {/* Profile Info */}
+          <div className="relative px-8 pb-8">
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between -mt-24 mb-6">
+              <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6">
+                {/* Avatar with glow effect */}
+                <motion.div
+                  whileHover={{ scale: 1.05, rotate: 5 }}
+                  className="relative group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-purple-500 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                  <div className="relative w-48 h-48 rounded-3xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex items-center justify-center text-white text-7xl font-bold shadow-2xl border-4 border-white/20">
+                    {instructorData.name.charAt(0)}
+                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center border-4 border-[#0a0e27]">
+                      <Sparkles className="w-4 h-4 text-white" />
+                    </div>
+                  </div>
+                </motion.div>
+                
+                <div className="text-center sm:text-left mb-4 sm:mb-2">
+                  <div className="flex items-center gap-3 mb-2 justify-center sm:justify-start flex-wrap">
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editForm.name}
+                        onChange={(e) => handleChange('name', e.target.value)}
+                        className="text-4xl font-bold text-white bg-white/10 backdrop-blur-xl border-2 border-white/20 rounded-2xl px-4 py-2 focus:border-cyan-400 focus:outline-none"
+                      />
+                    ) : (
+                      <h1 className="text-4xl md:text-5xl font-bold text-white">
+                        {instructorData.name}
+                      </h1>
+                    )}
+                    {instructorData.averageRating >= 4.5 && (
+                      <motion.div 
+                        whileHover={{ scale: 1.1 }}
+                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full shadow-lg"
+                      >
+                        <Award className="w-5 h-5 text-white" />
+                        <span className="text-sm font-bold text-white">Top Rated</span>
+                      </motion.div>
+                    )}
+                  </div>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={editForm.title}
+                      onChange={(e) => handleChange('title', e.target.value)}
+                      className="text-xl text-gray-300 mb-3 bg-white/10 backdrop-blur-xl border-2 border-white/20 rounded-xl px-4 py-2 focus:border-cyan-400 focus:outline-none w-full"
+                    />
+                  ) : (
+                    <p className="text-xl text-gray-300 mb-3">{instructorData.title}</p>
+                  )}
+                  <div className="flex items-center gap-4 text-sm text-gray-400 justify-center sm:justify-start flex-wrap">
+                    <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-1 bg-white/5 px-3 py-1.5 rounded-full backdrop-blur-xl">
+                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                      <span className="font-semibold text-white">
+                        {instructorData.averageRating > 0 ? instructorData.averageRating.toFixed(1) : "0.0"}
+                      </span>
+                      {instructorData.totalReviews > 0 && (
+                        <span>({instructorData.totalReviews})</span>
+                      )}
+                    </motion.div>
+                    <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-1 bg-white/5 px-3 py-1.5 rounded-full backdrop-blur-xl">
+                      <Users className="w-4 h-4 text-cyan-400" />
+                      <span className="text-white">{instructorData.totalStudents.toLocaleString()} students</span>
+                    </motion.div>
+                    <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-1 bg-white/5 px-3 py-1.5 rounded-full backdrop-blur-xl">
+                      <BookOpen className="w-4 h-4 text-purple-400" />
+                      <span className="text-white">{instructorData.totalCourses} courses</span>
+                    </motion.div>
+                  </div>
+                </div>
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleEdit}
+                className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold rounded-2xl shadow-lg hover:shadow-cyan-500/50 transition-all flex items-center gap-2 self-center lg:self-end border border-cyan-400/50"
+              >
+                <Edit2 className="w-5 h-5" />
+                Edit Profile
+              </motion.button>
+            </div>
+          </div>
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* About Section */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-xl p-8"
+            >
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-white">About</h2>
+              </div>
+              
+              {isEditing ? (
+                <textarea
+                  value={editForm.bio}
+                  onChange={(e) => handleChange('bio', e.target.value)}
+                  className="w-full p-4 border-2 border-white/20 rounded-2xl focus:border-cyan-400 focus:outline-none text-gray-300 bg-white/5 backdrop-blur-xl mb-6 min-h-[120px]"
+                  placeholder="Tell us about yourself..."
+                />
+              ) : (
+                <p className="text-gray-300 mb-6 leading-relaxed">{instructorData.bio}</p>
+              )}
+              
+              <div className="space-y-3">
+                <motion.div whileHover={{ x: 5 }} className="flex items-center gap-3 text-gray-300 p-3 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                    <Mail className="w-5 h-5 text-white" />
+                  </div>
+                  {isEditing ? (
+                    <input
+                      type="email"
+                      value={editForm.email}
+                      onChange={(e) => handleChange('email', e.target.value)}
+                      className="flex-1 px-3 py-2 border-2 border-white/20 rounded-lg focus:border-cyan-400 focus:outline-none text-sm bg-white/5 text-white"
+                    />
+                  ) : (
+                    <span className="text-sm">{instructorData.email}</span>
+                  )}
+                </motion.div>
+                
+                <motion.div whileHover={{ x: 5 }} className="flex items-center gap-3 text-gray-300 p-3 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
+                    <MapPin className="w-5 h-5 text-white" />
+                  </div>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={editForm.location}
+                      onChange={(e) => handleChange('location', e.target.value)}
+                      className="flex-1 px-3 py-2 border-2 border-white/20 rounded-lg focus:border-cyan-400 focus:outline-none text-sm bg-white/5 text-white"
+                    />
+                  ) : (
+                    <span className="text-sm">{instructorData.location}</span>
+                  )}
+                </motion.div>
+                
+                <motion.div whileHover={{ x: 5 }} className="flex items-center gap-3 text-gray-300 p-3 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center">
+                    <Calendar className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-sm">Teaching since {instructorData.joinedDate}</span>
+                </motion.div>
+
+                <motion.div whileHover={{ x: 5 }} className="flex items-center gap-3 text-gray-300 p-3 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-white" />
+                  </div>
+                  <span className="text-sm">Responds in {instructorData.responseTime}</span>
+                </motion.div>
+              </div>
+
+              {isEditing && (
+                <div className="flex gap-3 mt-6">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleSave}
+                    className="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-cyan-500/50 transition-all"
+                  >
+                    Save Changes
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleCancel}
+                    className="flex-1 py-3 bg-white/10 backdrop-blur-xl border border-white/20 text-white font-bold rounded-xl hover:bg-white/20 transition-all"
+                  >
+                    Cancel
+                  </motion.button>
+                </div>
+              )}
+            </motion.div>
+
+            {/* Expertise */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-xl p-8"
+            >
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-white">Expertise</h2>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {instructorData.expertise.map((skill, index) => (
+                  <motion.span
+                    key={skill}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3 + index * 0.1 }}
+                    whileHover={{ scale: 1.1, y: -2 }}
+                    className="px-5 py-2.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 backdrop-blur-xl border-2 border-cyan-400/50 rounded-xl text-cyan-300 font-semibold text-sm hover:border-cyan-400 hover:from-cyan-500/30 hover:to-blue-500/30 transition-all cursor-pointer shadow-lg"
+                  >
+                    {skill}
+                  </motion.span>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Languages */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-xl p-8"
+            >
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
+                  <Globe className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-white">Languages</h2>
+              </div>
+              <div className="space-y-3">
+                {instructorData.languages.map((language, index) => (
+                  <motion.div 
+                    key={language}
+                    whileHover={{ x: 5 }}
+                    className="flex items-center gap-3 p-3 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10"
+                  >
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                    <span className="text-gray-200 font-medium">{language}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Social Links */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-xl p-8"
+            >
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
+                  <Share2 className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-white">Connect</h2>
+              </div>
+              <div className="space-y-3">
+                {socialLinks.map((social, index) => (
+                  <motion.a
+                    key={social.label}
+                    href="#"
+                    whileHover={{ scale: 1.02, x: 5 }}
+                    className="flex items-center gap-3 p-4 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10 hover:bg-white/10 transition-all group"
+                  >
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${social.color} flex items-center justify-center shadow-lg`}>
+                      <social.icon className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-400">{social.label}</div>
+                      <div className="text-sm font-semibold text-white">{social.value}</div>
+                    </div>
+                  </motion.a>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Right Column */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Teaching Stats */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-xl p-8"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
+                    <TrendingUp className="w-6 h-6 text-white" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-white">Teaching Stats</h2>
+                </div>
+                <div className="flex items-center gap-2 text-gray-400 bg-white/5 px-4 py-2 rounded-full backdrop-blur-xl">
+                  <Sparkles className="w-4 h-4" />
+                  <span className="text-sm font-medium">Your Impact</span>
+                </div>
+              </div>
+
+              {instructorData.totalCourses === 0 ? (
+                <div className="text-center py-16">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", duration: 0.5 }}
+                    className="relative w-32 h-32 mx-auto mb-6"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-3xl blur-2xl opacity-50"></div>
+                    <div className="relative w-full h-full rounded-3xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-2xl">
+                      <BookOpen className="w-16 h-16 text-white" />
+                    </div>
+                  </motion.div>
+                  <h3 className="text-3xl font-bold text-white mb-3">
+                    Start Your Teaching Journey
+                  </h3>
+                  <p className="text-gray-400 mb-8 max-w-md mx-auto text-lg">
+                    You haven't created any courses yet. Share your knowledge and start teaching today!
+                  </p>
+                  <motion.button
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold rounded-2xl shadow-lg hover:shadow-cyan-500/50 transition-all border border-cyan-400/50"
+                  >
+                    Create Your First Course
+                  </motion.button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {stats.map((stat, index) => (
+                    <motion.div
+                      key={stat.label}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 + index * 0.1 }}
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      className={`bg-gradient-to-br ${stat.bgColor} backdrop-blur-xl rounded-2xl p-6 border-2 border-white/20 hover:border-white/40 transition-all cursor-pointer shadow-xl`}
+                    >
+                      <div className="flex items-start justify-between mb-4">
+                        <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg`}>
+                          <stat.icon className="w-7 h-7 text-white" />
+                        </div>
+                      </div>
+                      <div className="text-4xl font-bold text-gray-900 mb-1">
+                        {stat.value}
+                      </div>
+                      <div className="text-sm font-medium text-gray-600">
+                        {stat.label}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+
+            {/* Additional Stats */}
+            {instructorData.totalCourses > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl shadow-2xl p-8 text-white border border-purple-400/50"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-xl flex items-center justify-center">
+                    <Target className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold">Teaching Impact</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  <motion.div whileHover={{ scale: 1.05 }} className="text-center p-4 rounded-2xl bg-white/10 backdrop-blur-xl">
+                    <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Video className="w-8 h-8" />
+                    </div>
+                    <div className="text-3xl font-bold mb-1">{instructorData.teachingHours}h</div>
+                    <div className="text-sm text-white/80">Teaching Hours</div>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.05 }} className="text-center p-4 rounded-2xl bg-white/10 backdrop-blur-xl">
+                    <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <MessageSquare className="w-8 h-8" />
+                    </div>
+                    <div className="text-3xl font-bold mb-1">{instructorData.responseTime}</div>
+                    <div className="text-sm text-white/80">Avg Response Time</div>
+                  </motion.div>
+                  <motion.div whileHover={{ scale: 1.05 }} className="text-center p-4 rounded-2xl bg-white/10 backdrop-blur-xl">
+                    <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <Target className="w-8 h-8" />
+                    </div>
+                    <div className="text-3xl font-bold mb-1">98%</div>
+                    <div className="text-sm text-white/80">Completion Rate</div>
+                  </motion.div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Achievements Section */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-xl p-8"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
+                  <Trophy className="w-6 h-6 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-white">Achievements</h2>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {achievements.map((achievement, index) => (
+                  <motion.div
+                    key={achievement.title}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.3 + index * 0.1 }}
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    className={`p-6 rounded-2xl transition-all cursor-pointer ${
+                      achievement.locked
+                        ? 'bg-white/5 backdrop-blur-xl border border-white/10 opacity-50'
+                        : 'bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border-2 border-white/30 shadow-lg'
+                    }`}
+                  >
+                    <div className={`relative w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center ${
+                      achievement.locked
+                        ? 'bg-white/10'
+                        : `bg-gradient-to-br ${achievement.gradient} shadow-xl`
+                    }`}>
+                      {!achievement.locked && (
+                        <div className={`absolute inset-0 bg-gradient-to-br ${achievement.gradient} rounded-2xl blur-xl opacity-50`}></div>
+                      )}
+                      <achievement.icon className={`w-10 h-10 relative z-10 ${
+                        achievement.locked ? 'text-gray-600' : 'text-white'
+                      }`} />
+                    </div>
+                    <h3 className={`text-lg font-bold text-center mb-2 ${
+                      achievement.locked ? 'text-gray-500' : 'text-white'
+                    }`}>
+                      {achievement.title}
+                    </h3>
+                    <p className={`text-sm text-center ${
+                      achievement.locked ? 'text-gray-600' : 'text-gray-400'
+                    }`}>
+                      {achievement.description}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
+
+              {instructorData.totalCourses === 0 && (
+                <motion.p 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="text-center text-gray-400 text-sm mt-6 bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10"
+                >
+                  🚀 Create courses and engage with students to unlock achievements!
+                </motion.p>
+              )}
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
