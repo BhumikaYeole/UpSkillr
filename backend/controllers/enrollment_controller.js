@@ -1,4 +1,5 @@
 import Enrollment from "../models/enrollment.js";
+import User from "../models/user.js";
 
 export const enrollCourse = async (req, res, next) => {
   try {

@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { 
-  Mail, 
-  Lock, 
-  User, 
-  Eye, 
-  EyeOff, 
+import {
+  Mail,
+  Lock,
+  User,
+  Eye,
+  EyeOff,
   ArrowRight,
   Check,
   GraduationCap,
@@ -15,10 +15,13 @@ import {
   Sparkles
 } from "lucide-react";
 
+import { useAuth } from "../hooks/useAuth.js";
+
 export default function SignUpPage() {
+
+  const { signupLearner } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [selectedRole, setSelectedRole] = useState("learner");
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -32,16 +35,29 @@ export default function SignUpPage() {
     { icon: <TrendingUp className="w-5 h-5" />, text: "Track your progress" },
     { icon: <Sparkles className="w-5 h-5" />, text: "Earn UpSkillr coins" }
   ];
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Sign up data:", { ...formData, role: selectedRole });
-    // Add navigation logic via window.location or callback prop
-    if (selectedRole === "learner") {
-      window.location.href = "/learner-dashboard";
-    } else {
-      window.location.href = "/instructor-dashboard";
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match!");
+      return;
     }
+
+    try {
+      signupLearner({
+        name: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        role: "learner"
+      })
+      alert("Signup successful! You can now sign in.");
+      window.location.href = "/learner-dashboard";
+    }
+    catch (err) {
+      alert("Signup failed. Try changing your email or password.");
+      console.error(err);
+
+    };
+
   };
 
   const handleInputChange = (e) => {
@@ -56,7 +72,7 @@ export default function SignUpPage() {
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          animate={{ 
+          animate={{
             scale: [1, 1.2, 1],
             opacity: [0.05, 0.1, 0.05],
             rotate: [0, 180, 360]
@@ -65,7 +81,7 @@ export default function SignUpPage() {
           className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-cyan-400/20 to-blue-500/20 rounded-full blur-3xl"
         />
         <motion.div
-          animate={{ 
+          animate={{
             scale: [1.2, 1, 1.2],
             opacity: [0.05, 0.1, 0.05],
             rotate: [360, 180, 0]
@@ -158,51 +174,6 @@ export default function SignUpPage() {
 
             <h2 className="text-3xl font-bold text-white mb-2 text-center">Create Your Account</h2>
             <p className="text-gray-400 text-center mb-8">Start learning in less than 2 minutes</p>
-
-            {/* Role Selection */}
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setSelectedRole("learner")}
-                className={`p-4 rounded-2xl border-2 transition-all ${
-                  selectedRole === "learner"
-                    ? "bg-gradient-to-br from-cyan-400/20 to-blue-500/20 border-cyan-400"
-                    : "bg-white/5 border-white/10 hover:border-white/20"
-                }`}
-              >
-                <BookOpen className={`w-6 h-6 mx-auto mb-2 ${
-                  selectedRole === "learner" ? "text-cyan-400" : "text-gray-400"
-                }`} />
-                <div className={`font-semibold ${
-                  selectedRole === "learner" ? "text-white" : "text-gray-400"
-                }`}>
-                  I want to learn
-                </div>
-                <div className="text-xs text-gray-500 mt-1">Access courses</div>
-              </motion.button>
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setSelectedRole("instructor")}
-                className={`p-4 rounded-2xl border-2 transition-all ${
-                  selectedRole === "instructor"
-                    ? "bg-gradient-to-br from-purple-400/20 to-pink-500/20 border-purple-400"
-                    : "bg-white/5 border-white/10 hover:border-white/20"
-                }`}
-              >
-                <GraduationCap className={`w-6 h-6 mx-auto mb-2 ${
-                  selectedRole === "instructor" ? "text-purple-400" : "text-gray-400"
-                }`} />
-                <div className={`font-semibold ${
-                  selectedRole === "instructor" ? "text-white" : "text-gray-400"
-                }`}>
-                  I want to teach
-                </div>
-                <div className="text-xs text-gray-500 mt-1">Create courses</div>
-              </motion.button>
-            </div>
 
             <div className="space-y-6">
               {/* Full Name */}
@@ -326,7 +297,7 @@ export default function SignUpPage() {
             <div className="mt-6 text-center">
               <span className="text-gray-400">Already have an account? </span>
               <button
-                onClick={() => window.location.href = "/"}
+                onClick={() => window.location.href = "/login"}
                 className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors"
               >
                 Sign In

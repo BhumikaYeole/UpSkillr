@@ -10,11 +10,14 @@ import progressRouter from "./routes/progress_routes.js"
 import resourceRouter from "./routes/resource_routes.js"
 import userRouter from "./routes/user_routes.js"    
 import certificateRouter from "./routes/certificate_routes.js"
+import cors from "cors"
 
 const app = express()
 
 app.use(express.json())
 app.use(cookieParser())
+app.use(cors())
+
 app.use(express.urlencoded({extended : false}))
 
 app.use("/api/auth", authRouter)

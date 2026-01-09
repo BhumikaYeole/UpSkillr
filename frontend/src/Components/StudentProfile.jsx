@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { 
-  Mail, 
-  MapPin, 
-  Calendar, 
-  Edit2, 
-  BookOpen, 
-  Trophy, 
-  Target, 
+import {
+  Mail,
+  MapPin,
+  Calendar,
+  Edit2,
+  BookOpen,
+  Trophy,
+  Target,
   Clock,
   Award,
   TrendingUp,
@@ -18,37 +18,74 @@ import {
   Shield,
   Rocket
 } from "lucide-react";
+import { useProfile } from "../hooks/useProfile";
+import { useNavigate } from "react-router-dom";
 
 export default function StudentProfile() {
   const [isEditing, setIsEditing] = useState(false);
+  const [userData, setUserData] = useState(null);
+  const [editForm, setEditForm] = useState(null);
+  const { user, enrolledCourses, loading, updateProfile, lessonsCompleted,completedCourses, learningTime } = useProfile();
 
-  // Dynamic user data - can be passed as props
-  const [userData, setUserData] = useState({
-    name: "John Doe",
-    role: "Learner",
-    email: "john.doe@example.com",
-    location: "San Francisco, CA",
-    joinedDate: "January 2024",
-    bio: "Passionate learner exploring new technologies and building awesome projects.",
-    coins: 0,
-    enrolledCourses: 0,
-    completedCourses: 0,
-    lessonsCompleted: 0,
-    learningTime: "0h",
-    skills: ["React", "JavaScript", "Python", "UI/UX"]
-  });
+  const navigate = useNavigate();
 
-  const [editForm, setEditForm] = useState(userData);
+  useEffect(() => {
+    if(loading) return;
+    if (!user) return;
+    
+
+    const mappedUserData = {
+      name: user.name,
+      role: user.role,
+      email: user.email,
+      location: user.location || "—",
+      joinedDate: user.createdAt
+        ? new Date(user.createdAt).toLocaleDateString("en-US", {
+            month: "long",
+            year: "numeric"
+          })
+        : "—",
+      bio: user.about || "",
+      coins: user.coins || 0,
+      enrolledCourses: enrolledCourses,
+      completedCourses: completedCourses || 0,
+      lessonsCompleted: lessonsCompleted || 0,
+      learningTime: learningTime || "0h",
+    };
+
+    setUserData(mappedUserData);
+    setEditForm(mappedUserData);
+  }, [user, enrolledCourses, completedCourses, lessonsCompleted, learningTime]);
 
   const handleEdit = () => {
     setEditForm(userData);
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    setUserData(editForm);
+  const handleSave = async () => {
+  try {
+    const payload = {
+      name: editForm.name,
+      email: editForm.email,
+      location: editForm.location,
+      about: editForm.bio
+    };
+
+    const updatedUser = await updateProfile(payload);
+
+    setUserData(prev => ({
+      ...prev,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      location: updatedUser.location,
+      bio: updatedUser.about
+    }));
+
     setIsEditing(false);
-  };
+  } catch (err) {
+    console.error("Profile update failed", err);
+  }
+};
 
   const handleCancel = () => {
     setEditForm(userData);
@@ -59,71 +96,54 @@ export default function StudentProfile() {
     setEditForm(prev => ({ ...prev, [field]: value }));
   };
 
-  const achievements = [
-    { 
-      icon: BookOpen, 
-      title: "First Course", 
-      locked: true,
-      gradient: "from-blue-400 to-cyan-500"
-    },
-    { 
-      icon: Target, 
-      title: "Quick Learner", 
-      locked: true,
-      gradient: "from-purple-400 to-pink-500"
-    },
-    { 
-      icon: Trophy, 
-      title: "Course Master", 
-      locked: true,
-      gradient: "from-yellow-400 to-orange-500"
-    },
-    { 
-      icon: Star, 
-      title: "100 Coins", 
-      locked: true,
-      gradient: "from-green-400 to-emerald-500"
-    }
-  ];
 
   const stats = [
     {
       icon: BookOpen,
       label: "Enrolled Courses",
-      value: userData.enrolledCourses,
+      value: enrolledCourses.length,
       color: "from-blue-400 to-cyan-500",
       bgColor: "from-blue-50 to-cyan-50"
     },
     {
       icon: Trophy,
       label: "Completed",
-      value: userData.completedCourses,
+      value: completedCourses,
       color: "from-emerald-400 to-green-500",
       bgColor: "from-emerald-50 to-green-50"
     },
     {
       icon: Target,
       label: "Lessons Completed",
-      value: userData.lessonsCompleted,
+      value: lessonsCompleted,
       color: "from-amber-400 to-orange-500",
       bgColor: "from-amber-50 to-orange-50"
     },
     {
       icon: Clock,
       label: "Learning Time",
-      value: userData.learningTime,
+      value: learningTime,
       color: "from-purple-400 to-pink-500",
       bgColor: "from-purple-50 to-pink-50"
     }
   ];
+
+  //  safe render guard
+  if (loading || !userData || !editForm) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        Loading profile...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0e27] via-[#1a1f3a] to-[#0f1729] py-8 px-4 sm:px-6 lg:px-8">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }}></div>
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "2s" }}></div>
       </div>
 
       <div className="max-w-6xl mx-auto relative z-10">
@@ -303,35 +323,6 @@ export default function StudentProfile() {
                 </div>
               )}
             </motion.div>
-
-            {/* Skills Section */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-xl p-8"
-            >
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-white">Skills</h2>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {userData.skills.map((skill, index) => (
-                  <motion.span
-                    key={skill}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    className="px-5 py-2.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-xl border-2 border-blue-400/50 rounded-xl text-blue-300 font-semibold text-sm hover:border-blue-400 hover:from-blue-500/30 hover:to-purple-500/30 transition-all cursor-pointer shadow-lg"
-                  >
-                    {skill}
-                  </motion.span>
-                ))}
-              </div>
-            </motion.div>
           </div>
 
           {/* Right Column */}
@@ -378,6 +369,7 @@ export default function StudentProfile() {
                   <motion.button
                     whileHover={{ scale: 1.05, y: -2 }}
                     whileTap={{ scale: 0.95 }}
+                    onClick={()=>navigate("/courses")}
                     className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold rounded-2xl shadow-lg hover:shadow-blue-500/50 transition-all border border-blue-400/50"
                   >
                     Browse Courses
@@ -411,66 +403,6 @@ export default function StudentProfile() {
               )}
             </motion.div>
 
-            {/* Achievements Section */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-xl p-8"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
-                  <Trophy className="w-6 h-6 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-white">Achievements</h2>
-              </div>
-              
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-                {achievements.map((achievement, index) => (
-                  <motion.div
-                    key={achievement.title}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
-                    whileHover={{ scale: 1.05, y: -5 }}
-                    className={`text-center p-6 rounded-2xl transition-all cursor-pointer ${
-                      achievement.locked
-                        ? 'bg-white/5 backdrop-blur-xl border border-white/10 opacity-50'
-                        : 'bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border-2 border-white/30 shadow-lg'
-                    }`}
-                  >
-                    <div className={`relative w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center ${
-                      achievement.locked
-                        ? 'bg-white/10'
-                        : `bg-gradient-to-br ${achievement.gradient} shadow-xl`
-                    }`}>
-                      {!achievement.locked && (
-                        <div className={`absolute inset-0 bg-gradient-to-br ${achievement.gradient} rounded-2xl blur-xl opacity-50`}></div>
-                      )}
-                      <achievement.icon className={`w-10 h-10 relative z-10 ${
-                        achievement.locked ? 'text-gray-600' : 'text-white'
-                      }`} />
-                    </div>
-                    <p className={`text-sm font-semibold ${
-                      achievement.locked ? 'text-gray-500' : 'text-white'
-                    }`}>
-                      {achievement.title}
-                    </p>
-                  </motion.div>
-                ))}
-              </div>
-
-              {userData.enrolledCourses === 0 && (
-                <motion.p 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                  className="text-center text-gray-400 text-sm mt-6 bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10"
-                >
-                  🎯 Complete courses to unlock achievements and earn rewards!
-                </motion.p>
-              )}
-            </motion.div>
           </div>
         </div>
       </div>

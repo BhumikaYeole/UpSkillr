@@ -92,13 +92,58 @@ export const addLesson = async (req, res, next) => {
 };
 
 // GET ALL COURSES
-
+//  used mongodb aggregators to optimize db queries
 export const getCourses = async (req, res, next) => {
   try {
-    const courses = await Course.find().populate("instructor", "name email expertise");
-    console.log(courses);
+    const courses = await Course.aggregate([
+      // Join lessons
+      {
+        $lookup: {
+          from: "lessons",            
+          localField: "_id",
+          foreignField: "courseId",
+          as: "lessons"
+        }
+      },
 
-    if(courses.length === 0){
+      // Compute total duration
+      {
+        $addFields: {
+          lesson_length: { $size: "$lessons" },
+          duration: {
+            $sum: "$lessons.duration"
+          }
+        }
+      },
+
+      // Join instructor
+      {
+        $lookup: {
+          from: "users",
+          localField: "instructor",
+          foreignField: "_id",
+          as: "instructor"
+        }
+      },
+
+      // Convert instructor array → object
+      {
+        $unwind: {
+          path: "$instructor",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+
+      // Select only required instructor fields
+      {
+        $project: {
+          "instructor.password": 0,
+          "lessons": 0            
+        }
+      }
+    ]);
+
+    if (!courses.length) {
       return res.status(404).json({
         success: false,
         message: "No courses found"
@@ -108,11 +153,13 @@ export const getCourses = async (req, res, next) => {
     res.status(200).json({
       success: true,
       courses
-    });    
+    });
+
   } catch (error) {
     next(error);
   }
-}
+};
+
 
 // GET COURSE CURRICULUM
 

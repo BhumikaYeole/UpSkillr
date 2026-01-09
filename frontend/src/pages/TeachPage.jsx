@@ -21,18 +21,35 @@ export default function TeachPage() {
   });
   const [showVideoModal, setShowVideoModal] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form submitted:", formData);
-    alert("Application submitted successfully! We'll get back to you soon.");
-  };
-
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
   };
+  const BASE_URL = "http://localhost:5000/api";
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    fetch(`${BASE_URL}/auth/sign-up/instructor`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(formData)
+    } 
+    ) .then(response => response.json())
+      .then(data => {
+        // console.log("Success:", data);  
+        alert("Application submitted successfully!");
+        window.location.href = "/instructor-dashboard"; 
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+    
+  };
+
 
   const features = [
     {
@@ -81,18 +98,13 @@ export default function TeachPage() {
     },
     {
       number: "02",
-      title: "Set Your Price",
-      description: "Choose your pricing strategy. Offer free previews, paid content, or subscription access."
-    },
-    {
-      number: "03",
       title: "Publish & Promote",
       description: "Go live instantly. We'll help promote your course to our growing community of learners."
     },
     {
-      number: "04",
-      title: "Earn & Grow",
-      description: "Get paid monthly. Use analytics to improve your content and grow your student base."
+      number: "03",
+      title: "Grow",
+      description: "Use analytics to improve your content and grow your student base."
     }
   ];
 
@@ -102,7 +114,6 @@ export default function TeachPage() {
       role: "React Instructor",
       image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200",
       quote: "UpSkillr gave me the platform to share my knowledge and build a sustainable income doing what I love.",
-      earnings: "$124,000",
       students: "12,450"
     },
     {
@@ -110,7 +121,6 @@ export default function TeachPage() {
       role: "Design Instructor",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200",
       quote: "The course builder is incredibly intuitive. I created my first course in just a weekend!",
-      earnings: "$89,000",
       students: "8,920"
     },
     {
@@ -118,7 +128,6 @@ export default function TeachPage() {
       role: "Data Science Instructor",
       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200",
       quote: "From zero to six figures in 18 months. The support team and community made all the difference.",
-      earnings: "$156,000",
       students: "15,680"
     }
   ];
@@ -237,10 +246,6 @@ export default function TeachPage() {
                 <div>
                   <div className="text-3xl font-bold text-white mb-1">$25M+</div>
                   <div className="text-sm text-gray-400">Paid to Instructors</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-white mb-1">97%</div>
-                  <div className="text-sm text-gray-400">Revenue Share</div>
                 </div>
               </div>
 
@@ -466,10 +471,6 @@ export default function TeachPage() {
                 </p>
 
                 <div className="flex justify-between pt-4 border-t border-white/10">
-                  <div>
-                    <div className="text-2xl font-bold text-blue-400">{testimonial.earnings}</div>
-                    <div className="text-xs text-gray-500">Total Earnings</div>
-                  </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold text-white">{testimonial.students}</div>
                     <div className="text-xs text-gray-500">Students</div>
@@ -576,6 +577,21 @@ export default function TeachPage() {
                 <option value="experienced">Experienced (3-5 years)</option>
                 <option value="expert">Expert (5+ years)</option>
               </select>
+            </div>
+
+            <div>
+              <label className="block text-gray-900 font-medium mb-2">
+                Set Password <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="........"
+                required
+                className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:border-blue-400 transition-colors"
+              />
             </div>
 
             <motion.button

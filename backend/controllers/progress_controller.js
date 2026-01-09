@@ -106,16 +106,43 @@ export const getLearnerDashboard = async (req, res, next) => {
     const learnerId = req.user._id;
 
     const progressData = await Progress.find({ learner: learnerId })
+      .populate({
+        path: "completedLessons",
+        select: "duration"
+      })
       .populate("course", "title thumbnail");
 
+    let totalLessonsCompleted = 0;
+    let completedCourses = 0;
+    let totalLearningTime = 0; 
+
+    progressData.forEach(progress => {
+      const lessonsCount = progress.completedLessons.length;
+      totalLessonsCompleted += lessonsCount;
+
+      progress.completedLessons.forEach(lesson => {
+        totalLearningTime += lesson.duration;
+      });
+
+      if (progress.progressPercentage === 100) {
+        completedCourses++;
+      }
+    });
 
     res.status(200).json({
       success: true,
-      progressData,
+      dashboard: {
+        enrolledCourses: progressData.length,
+        completedCourses,
+        lessonsCompleted: totalLessonsCompleted,
+        learningTime: `${totalLearningTime} min`,
+        progressData
+      }
     });
 
   } catch (error) {
     next(error);
   }
 };
+
 

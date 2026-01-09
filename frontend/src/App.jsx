@@ -11,6 +11,8 @@ import InstructorDashboard from './pages/InstructorDashboard';
 import LearnerProfile from './pages/LearnerProfile';
 import InstructorProfile from './pages/InstructorProfile';
 import SignUp from './pages/Signup';  
+import Login from './pages/Login';
+import ProtectedRoute from './Components/ProtectedRoute';
 
 
 function App() {
@@ -24,11 +26,23 @@ function App() {
           <Route path="/certificates" element={<CertificatePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/teach" element={<TeachPage />} />
-          <Route path="/learner-dashboard" element={<LearnerDashboard />} />
+          <Route
+            path="/learner-dashboard"
+            element={
+              <ProtectedRoute role="learner">
+                <LearnerDashboard />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/instructor-dashboard" element={<InstructorDashboard />} />
-          <Route path="/learner-profile" element={<LearnerProfile />} />
+          <Route path="/learner-profile" element={
+            <ProtectedRoute role="learner">
+                <LearnerProfile />
+              </ProtectedRoute>
+            } />
           <Route path="/instructor-profile" element={<InstructorProfile />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </Layout>
     </Router>

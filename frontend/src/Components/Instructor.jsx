@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { DollarSign, Globe, Zap, ArrowRight, Users, BookOpen, Award } from "lucide-react";
 
@@ -29,6 +29,8 @@ export default function BecomeInstructorSection() {
     { value: "500K+", label: "Students Taught", icon: <BookOpen className="w-5 h-5" /> },
     { value: "$2M+", label: "Earned by Instructors", icon: <Award className="w-5 h-5" /> }
   ];
+
+  const navigate = useNavigate();
 
   return (
     <section className="relative bg-gradient-to-br from-[#0a1525] via-[#050b14] to-[#0f1a2a] py-28 px-6 overflow-hidden">
@@ -125,6 +127,7 @@ export default function BecomeInstructorSection() {
             <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.98 }}
+              onClick={()=>navigate("/teach")}
               className="group relative px-8 py-4 rounded-2xl bg-gradient-to-r from-orange-400 to-yellow-500 text-white font-semibold text-lg hover:from-orange-300 hover:to-yellow-400 transition-all duration-300 shadow-lg shadow-orange-400/30 hover:shadow-xl hover:shadow-orange-400/50 flex items-center gap-3"
             >
               Start Teaching Today
