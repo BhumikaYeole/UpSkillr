@@ -33,7 +33,6 @@ export default function StudentProfile() {
     if(loading) return;
     if (!user) return;
     
-
     const mappedUserData = {
       name: user.name,
       role: user.role,

@@ -1,3 +1,4 @@
+import Course from "../models/course.js";
 import Enrollment from "../models/enrollment.js";
 import User from "../models/user.js";
 
@@ -14,6 +15,10 @@ export const enrollCourse = async (req, res, next) => {
     await User.findByIdAndUpdate(learnerId, {
           $inc: { coins: 10 },
         });
+    
+    await Course.findByIdAndUpdate(courseId,{
+      $inc : {enrolledCount : 1},
+    });
 
     res.status(201).json({
       success: true,

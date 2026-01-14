@@ -1,354 +1,408 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { 
-  BookOpen, 
-  Users, 
-  TrendingUp, 
-  DollarSign,
-  Star,
-  Search,
+import {
+  BookOpen,
+  Users,
   Bell,
   Calendar,
-  PlayCircle,
-  Eye,
-  ChevronRight,
   Plus,
-  BarChart3,
-  MessageSquare,
-  Award,
-  Clock,
+  Search,
   Edit,
   MoreVertical,
-  ThumbsUp,
-  Download
+  ChevronRight,
+  Award,
+  User,
+  Info,
+  DeleteIcon,
+  Delete,
+  Trash,
 } from "lucide-react";
+import { useProfile } from "../hooks/useProfile";
+import { Link } from "react-router-dom";
+import { addResourceApi, deleteCourseApi } from "../api/course"
+import { useState } from "react";
 
 export default function InstructorDashboard() {
-  const [timeRange, setTimeRange] = useState("month");
-  
-  // INSTRUCTOR DATA - Connect to backend
-  const [totalCourses, setTotalCourses] = useState(0);
-  const [totalStudents, setTotalStudents] = useState(0);
-  const [averageRating, setAverageRating] = useState(0);
-  const [newEnrollments, setNewEnrollments] = useState(0);
+  const { loading, dashboard, user, refetchProfile } = useProfile();
+  const [activeCourseId, setActiveCourseId] = useState(null);
+
+  const [resourceData, setResourceData] = useState({
+    title: "",
+    type: "pdf",
+    fileUrl: "",
+    fileSize: "",
+    requiredCoins: 0,
+    isDownloadable: true,
+  });
+
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        Loading dashboard...
+      </div>
+    );
+  }
+
+  const totalCourses = dashboard?.dashboard?.totalCourses || 0
+  const totalStudents = dashboard?.dashboard?.totalStudents || 0
+  const publishedCourses = dashboard?.dashboard?.publishedCourses || []
 
   const stats = [
     {
       icon: <BookOpen className="w-6 h-6" />,
       label: "Total Courses",
       value: totalCourses,
-      change: totalCourses > 0 ? `+${totalCourses} published` : "+0%",
-      gradient: "from-blue-400 to-cyan-500"
+      gradient: "from-blue-400 to-cyan-500",
     },
     {
       icon: <Users className="w-6 h-6" />,
       label: "Total Students",
-      value: totalStudents.toLocaleString(),
-      change: newEnrollments > 0 ? `+${newEnrollments} this month` : "+0%",
-      gradient: "from-purple-400 to-pink-500"
+      value: totalStudents,
+      gradient: "from-purple-400 to-pink-500",
     },
     {
-      icon: <Star className="w-6 h-6" />,
-      label: "Average Rating",
-      value: averageRating > 0 ? averageRating.toFixed(1) : "0.0",
-      change: averageRating > 0 ? `${averageRating >= 4.5 ? "Excellent" : "Good"}` : "No reviews",
-      gradient: "from-orange-400 to-red-500"
+      icon: <Award className="w-6 h-6" />,
+      label: "Expertise",
+      value: user?.expertise || "Not set",
+      subValue: user?.experience || "Experience not added",
+      gradient: "from-orange-400 to-red-500",
+    },
+  ];
+
+  const handleDeleteCourse = async (courseId) => {
+
+    const res = await deleteCourseApi(courseId);
+    if (res.success) {
+      alert("Course Deleted Successfully");
+      refetchProfile()
     }
-  ];
+  }
 
-  // My Courses - empty by default
-  const myCourses = [
-    // {
-    //   title: "Complete React Development Masterclass",
-    //   students: 1234,
-    //   rating: 4.8,
-    //   reviews: 456,
-    //   revenue: 45600,
-    //   image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800",
-    //   status: "Published"
-    // }
-  ];
-
-  // Recent Activity
-  const recentActivity = [
-    // Empty by default
-  ];
-
-  // Top performing courses
-  const topCourses = [
-    // Empty by default
-  ];
+  const handleAddResource = async(activeCourseId,data)=>{
+    const res = await addResourceApi(activeCourseId, data);
+    if(res.success)
+    {
+      alert("Resource added Successfully")
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a1525] via-[#050b14] to-[#0f1a2a] py-8 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+
+        {/* ================= HEADER ================= */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="mb-8"
+          className="mb-10"
         >
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                Instructor Dashboard 👨‍🏫
+                Welcome, {user?.name} 👨‍🏫
               </h1>
-              <p className="text-gray-400">Manage your courses and track your performance</p>
+              <p className="text-gray-400">
+                Manage your courses and grow your teaching presence
+              </p>
             </div>
-            
+
             <div className="flex items-center gap-3">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold hover:from-cyan-300 hover:to-blue-400 transition-all inline-flex items-center gap-2"
-              >
-                <Plus className="w-5 h-5" />
-                Create New Course
-              </motion.button>
-              
-              <button className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all relative">
+              <Link to="/create-course">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold flex items-center gap-2"
+                >
+                  <Plus className="w-5 h-5" />
+                  Create Course
+                </motion.button>
+              </Link>
+
+              <button className="p-3 rounded-xl bg-white/5 border border-white/10">
                 <Bell className="w-5 h-5 text-gray-400" />
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
               </button>
-              <button className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all">
+              <button className="p-3 rounded-xl bg-white/5 border border-white/10">
                 <Calendar className="w-5 h-5 text-gray-400" />
               </button>
             </div>
           </div>
 
-          {/* Search Bar */}
-          <div className="relative max-w-xl">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search courses, students, or analytics..."
-              className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400/50 transition-all"
-            />
-          </div>
         </motion.div>
 
-        {/* Stats Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
-        >
+        {/* ================= STATS ================= */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {stats.map((stat, idx) => (
             <motion.div
               key={idx}
-              whileHover={{ y: -5 }}
-              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-all"
+              whileHover={{ y: -6 }}
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6"
             >
-              <div className="flex items-start justify-between mb-4">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center text-white`}>
-                  {stat.icon}
-                </div>
-                <span className="text-xs text-gray-400 bg-white/5 px-2 py-1 rounded-full">
-                  {stat.change}
-                </span>
+              <div
+                className={`w-12 h-12 mb-4 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center text-white`}
+              >
+                {stat.icon}
               </div>
-              <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
-              <div className="text-sm text-gray-400">{stat.label}</div>
+
+              <div className="text-2xl font-bold text-white mb-1">
+                {stat.value}
+              </div>
+
+              {stat.subValue && (
+                <div className="text-sm text-gray-400">
+                  {stat.subValue}
+                </div>
+              )}
+
+              <div className="text-xs text-gray-500 mt-1">
+                {stat.label}
+              </div>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
 
-        {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-8">
-          {/* Left Column - 2/3 width */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* My Courses */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-white">My Courses</h2>
-                <button className="text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1 text-sm font-medium">
-                  View All
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
+        {/* ================= MAIN GRID ================= */}
+        <div className="grid lg:grid-cols-3 gap-8">
 
-              {myCourses.length > 0 ? (
-                <div className="grid md:grid-cols-2 gap-6">
-                  {myCourses.map((course, idx) => (
-                    <motion.div
-                      key={idx}
-                      whileHover={{ y: -5 }}
-                      className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden hover:border-cyan-400/50 transition-all"
-                    >
-                      <div className="relative h-40">
-                        <img
-                          src={course.image}
-                          alt={course.title}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute top-3 right-3 flex gap-2">
-                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-400 text-white">
-                            {course.status}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="p-6">
-                        <h3 className="text-lg font-bold text-white mb-4">{course.title}</h3>
-                        
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                          <div>
-                            <div className="text-2xl font-bold text-white">{course.students}</div>
-                            <div className="text-xs text-gray-400">Students</div>
-                          </div>
-                          <div>
-                            <div className="text-2xl font-bold text-white">${course.revenue.toLocaleString()}</div>
-                            <div className="text-xs text-gray-400">Revenue</div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                            <span className="text-white font-medium text-sm">{course.rating}</span>
-                            <span className="text-gray-400 text-sm">({course.reviews})</span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex gap-2">
-                          <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="flex-1 py-2 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 text-white text-sm font-semibold hover:from-cyan-300 hover:to-blue-400 transition-all flex items-center justify-center gap-2"
-                          >
+          {/* ===== LEFT: MY COURSES ===== */}
+          <div className="lg:col-span-2">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-white">
+                My Courses
+              </h2>
+            </div>
+
+            {publishedCourses.length > 0 ? (
+              <div className="grid md:grid-cols-2 gap-6">
+                {publishedCourses.map((course) => (
+                  <motion.div
+                    key={course._id}
+                    whileHover={{ y: -6 }}
+                    className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden"
+                  >
+                    <img
+                      src={course.thumbnail}
+                      alt={course.title}
+                      className="h-40 w-full object-cover"
+                    />
+
+                    <div className="p-6">
+                      <h3 className="text-lg font-bold text-white mb-2">
+                        {course.title}
+                      </h3>
+
+                      <p className="text-sm text-gray-400 mb-4">
+                        {course.students} students enrolled
+                      </p>
+
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => setActiveCourseId(course._id)}
+                          className="w-full py-2 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 text-white text-sm font-semibold flex items-center justify-center gap-2">
+                          <Plus className="w-4 h-4" />
+                          Add Resources
+                        </button>
+                        <Link
+                          to={`/course/${course._id}/edit`}
+                          className="flex-1"
+                        >
+                          <button className="w-[100px] py-2 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 text-white text-sm font-semibold flex items-center justify-center gap-2">
                             <Edit className="w-4 h-4" />
                             Edit
-                          </motion.button>
-                          <button className="p-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10 transition-all">
-                            <MoreVertical className="w-4 h-4" />
                           </button>
-                        </div>
+                        </Link>
+
+
+
+                        <button
+                          onClick={() => handleDeleteCourse(course._id)}
+                          className="p-2 rounded-lg bg-white/5 border border-white/10 text-red-400">
+                          <Trash className="w-4 h-4" />
+                        </button>
                       </div>
-                    </motion.div>
-                  ))}
-                </div>
-              ) : (
-                <div className="bg-white/5 backdrop-blur-xl border border-white/10 border-dashed rounded-2xl p-12 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-cyan-400/20 to-blue-400/20 flex items-center justify-center">
-                    <BookOpen className="w-8 h-8 text-cyan-400" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2">No Courses Yet</h3>
-                  <p className="text-gray-400 mb-6">Create your first course and start teaching!</p>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold hover:from-cyan-300 hover:to-blue-400 transition-all inline-flex items-center gap-2"
-                  >
-                    <Plus className="w-5 h-5" />
-                    Create Your First Course
-                  </motion.button>
-                </div>
-              )}
-            </motion.div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white/5 border border-white/10 border-dashed rounded-2xl p-12 text-center">
+                <BookOpen className="w-12 h-12 text-cyan-400 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-white mb-2">
+                  No Courses Yet
+                </h3>
+                <p className="text-gray-400 mb-6">
+                  Start teaching by creating your first course
+                </p>
+                <Link to="/instructor/create-course">
+                  <button className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold">
+                    Create Course
+                  </button>
+                </Link>
+              </div>
+            )}
           </div>
 
-          {/* Right Sidebar */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="space-y-6"
-          >
-            {/* Quick Actions */}
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <h3 className="text-lg font-bold text-white mb-4">Quick Actions</h3>
-              <div className="space-y-3">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold hover:from-cyan-300 hover:to-blue-400 transition-all flex items-center justify-center gap-2"
+          {/* ===== RIGHT: PROFILE + TIPS ===== */}
+          <div className="space-y-6">
+
+            {/* Instructor Profile */}
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Instructor Profile
+              </h3>
+
+              <p className="text-sm text-gray-400 mb-2">
+                <span className="text-white">Email:</span> {user?.email}
+              </p>
+              <p className="text-sm text-gray-400 mb-2">
+                <span className="text-white">Expertise:</span>{" "}
+                {user?.expertise || "Not added"}
+              </p>
+              <p className="text-sm text-gray-400 mb-4">
+                <span className="text-white">Experience:</span>{" "}
+                {user?.experience || "Not added"}
+              </p>
+
+              <Link to="/instructor-profile">
+                <button className="w-full py-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
+                  Edit Profile
+                </button>
+              </Link>
+            </div>
+
+            {/* Instructor Tips */}
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <Info className="w-5 h-5" />
+                Teaching Tips
+              </h3>
+
+              <ul className="text-sm text-gray-400 space-y-2">
+                <li>• Add a clear course thumbnail</li>
+                <li>• Define learning outcomes</li>
+                <li>• Upload at least 5 lessons</li>
+                <li>• Add downloadable resources</li>
+              </ul>
+            </div>
+
+          </div>
+          {activeCourseId && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="w-full max-w-lg bg-[#0a1525] border border-white/10 rounded-2xl p-6 space-y-4"
+              >
+                <h2 className="text-xl font-bold text-white">Add Course Resource</h2>
+
+                {/* TITLE */}
+                <input
+                  placeholder="Resource Title"
+                  className="w-full p-3 rounded bg-white/10 text-white"
+                  value={resourceData.title}
+                  onChange={(e) =>
+                    setResourceData({ ...resourceData, title: e.target.value })
+                  }
+                />
+
+                {/* TYPE */}
+                <select
+                  className="w-full p-3 rounded bg-white/10 text-white"
+                  value={resourceData.type}
+                  onChange={(e) =>
+                    setResourceData({ ...resourceData, type: e.target.value })
+                  }
                 >
-                  <Plus className="w-4 h-4" />
-                  New Course
-                </motion.button>
-              </div>
-            </div>
+                  <option value="pdf" className="text-black">PDF</option>
+                  <option value="doc" className="text-black">DOC</option>
+                  <option value="ppt" className="text-black">PPT</option>
+                  <option value="cheatsheet" className="text-black">Cheatsheet</option>
+                  <option value="link" className="text-black">External Link</option>
+                </select>
 
-            {/* Top Performing Courses */}
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-              <h3 className="text-lg font-bold text-white mb-4">Top Performing</h3>
-              
-              {topCourses.length > 0 ? (
-                <div className="space-y-4">
-                  {topCourses.map((course, idx) => (
-                    <div key={idx} className="flex items-center gap-3">
-                      <img
-                        src={course.image}
-                        alt={course.title}
-                        className="w-12 h-12 rounded-lg object-cover"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-semibold text-white truncate">{course.title}</h4>
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
-                          <Users className="w-3 h-3" />
-                          <span>{course.students}</span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-bold text-green-400">${course.revenue}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Award className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                  <p className="text-sm text-gray-500">No data available yet</p>
-                </div>
-              )}
-            </div>
+                {/* FILE URL */}
+                <input
+                  placeholder="File URL"
+                  className="w-full p-3 rounded bg-white/10 text-white"
+                  value={resourceData.fileUrl}
+                  onChange={(e) =>
+                    setResourceData({ ...resourceData, fileUrl: e.target.value })
+                  }
+                />
 
-            {/* Performance Stats */}
-            <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-400/20 rounded-2xl p-6">
-              <h3 className="text-lg font-bold text-white mb-4">This Month</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-blue-400/10 flex items-center justify-center">
-                      <Eye className="w-5 h-5 text-blue-400" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-400">Course Views</div>
-                      <div className="text-xl font-bold text-white">{totalCourses > 0 ? "2.5K" : "0"}</div>
-                    </div>
-                  </div>
+                {/* FILE SIZE */}
+                <input
+                  type="number"
+                  placeholder="File Size (KB / MB)"
+                  className="w-full p-3 rounded bg-white/10 text-white"
+                  value={resourceData.fileSize}
+                  onChange={(e) =>
+                    setResourceData({ ...resourceData, fileSize: e.target.value })
+                  }
+                />
+
+                {/* REQUIRED COINS */}
+                <div >
+                  <span className="text-white py-10">Coins Required</span>
+                <input
+                  type="number"
+                  placeholder="Coins Required"
+                  className="w-full p-3 rounded bg-white/10 text-white"
+                  value={resourceData.requiredCoins}
+                  onChange={(e) =>
+                    setResourceData({
+                      ...resourceData,
+                      requiredCoins: Number(e.target.value),
+                    })
+                  }
+                />
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-green-400/10 flex items-center justify-center">
-                      <Users className="w-5 h-5 text-green-400" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-400">New Students</div>
-                      <div className="text-xl font-bold text-white">{newEnrollments}</div>
-                    </div>
-                  </div>
+
+                {/* DOWNLOADABLE */}
+                <label className="flex items-center gap-3 text-gray-300 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={resourceData.isDownloadable}
+                    onChange={(e) =>
+                      setResourceData({
+                        ...resourceData,
+                        isDownloadable: e.target.checked,
+                      })
+                    }
+                    className="accent-cyan-400"
+                  />
+                  Allow Download
+                </label>
+
+                {/* ACTIONS */}
+                <div className="flex justify-end gap-3 pt-4">
+                  <button
+                    onClick={() => setActiveCourseId(null)}
+                    className="px-5 py-2 rounded-lg bg-white/10 text-gray-300 hover:bg-white/20"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      handleAddResource(activeCourseId, resourceData);
+                      setActiveCourseId(null);
+                    }}
+                    className="px-5 py-2 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold"
+                  >
+                    Save Resource
+                  </button>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-purple-400/10 flex items-center justify-center">
-                      <ThumbsUp className="w-5 h-5 text-purple-400" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-400">New Reviews</div>
-                      <div className="text-xl font-bold text-white">{averageRating > 0 ? "12" : "0"}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
+              </motion.div>
+            </motion.div>
+          )}
+
         </div>
       </div>
     </div>

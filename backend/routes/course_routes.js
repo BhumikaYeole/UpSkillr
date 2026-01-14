@@ -29,7 +29,6 @@ courseRouter.delete("/courses/:courseId", authorize, allowInstructor, deleteCour
 courseRouter.put("/sections/:sectionId", authorize, allowInstructor, updateSection);
 courseRouter.delete("/sections/:sectionId", authorize, allowInstructor, deleteSection);
 
-
 courseRouter.put("/lessons/:lessonId", authorize, allowInstructor, updateLesson);
 courseRouter.delete("/lessons/:lessonId", authorize, allowInstructor, deleteLesson);
 

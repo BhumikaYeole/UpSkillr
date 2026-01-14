@@ -39,12 +39,21 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            await login({
+            const res = await login({
                 email: formData.email,
                 password: formData.password
             });
+            console.log(res.data.user.role)
 
-            window.location.href = "/learner-dashboard";
+            if(res.data.user.role === "learner")
+            {
+                window.location.href = "/learner-dashboard";
+            }
+            else{
+                window.location.href = "/instructor-dashboard";
+
+            }
+
         } catch (err) {
             alert("Invalid email or password");
             console.error(err);

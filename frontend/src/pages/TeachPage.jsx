@@ -11,8 +11,11 @@ import {
   X
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "../hooks/useAuth";
 
 export default function TeachPage() {
+  const { signupInstructor } = useAuth()
+
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -27,37 +30,32 @@ export default function TeachPage() {
       [e.target.name]: e.target.value
     });
   };
-  const BASE_URL = "http://localhost:5000/api";
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetch(`${BASE_URL}/auth/sign-up/instructor`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(formData)
-    } 
-    ) .then(response => response.json())
-      .then(data => {
-        // console.log("Success:", data);  
-        alert("Application submitted successfully!");
-        window.location.href = "/instructor-dashboard"; 
+
+    try {
+      signupInstructor({
+        name: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        expertise : formData.expertise,
+        experience : formData.experience,
+        role: "instructor"
       })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-    
+      alert("Signup successful! You can now sign in.");
+      window.location.href = "/instructor-dashboard";
+    }
+    catch (err) {
+      alert("Signup failed. Try changing your email or password.");
+      console.error(err);
+
+    };
+
   };
 
 
   const features = [
-    {
-      icon: <DollarSign className="w-6 h-6" />,
-      title: "Earn Revenue",
-      description: "Set your own prices and earn up to 97% revenue share on every enrollment. Get paid monthly.",
-      gradient: "from-blue-400 to-indigo-500"
-    },
     {
       icon: <Globe className="w-6 h-6" />,
       title: "Global Reach",
@@ -127,7 +125,7 @@ export default function TeachPage() {
       name: "Emily Roberts",
       role: "Data Science Instructor",
       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200",
-      quote: "From zero to six figures in 18 months. The support team and community made all the difference.",
+      quote: "The support team and community made all the difference.",
       students: "15,680"
     }
   ];
@@ -229,23 +227,23 @@ export default function TeachPage() {
               <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
                 Share Your Knowledge,{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">
-                  Earn Income
+                  Build Secure Courses
                 </span>
               </h1>
 
               <p className="text-gray-400 text-lg mb-10 leading-relaxed">
-                Join thousands of instructors who are making a difference by teaching what they love. Create courses, build your audience, and earn from your expertise.
+                Join thousands of instructors who are making a difference by teaching what they love. Create courses, build your audience, and grow in your expertise.
               </p>
 
               {/* Stats */}
               <div className="grid grid-cols-3 gap-6 mb-10">
                 <div>
-                  <div className="text-3xl font-bold text-white mb-1">50K+</div>
+                  <div className="text-3xl font-bold text-white mb-1">50+</div>
                   <div className="text-sm text-gray-400">Active Instructors</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-white mb-1">$25M+</div>
-                  <div className="text-sm text-gray-400">Paid to Instructors</div>
+                  <div className="text-3xl font-bold text-white mb-1">100+</div>
+                  <div className="text-sm text-gray-400">Active Learners</div>
                 </div>
               </div>
 
@@ -303,13 +301,10 @@ export default function TeachPage() {
 
                 <div className="grid grid-cols-3 gap-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">15.6K</div>
+                    <div className="text-2xl font-bold text-gray-900">150</div>
                     <div className="text-sm text-gray-600">Students</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">$156K</div>
-                    <div className="text-sm text-gray-600">Earnings</div>
-                  </div>
+                  
                   <div className="text-center">
                     <div className="text-2xl font-bold text-yellow-500 flex items-center justify-center gap-1">
                       4.9 <span className="text-lg">⭐</span>
@@ -319,15 +314,6 @@ export default function TeachPage() {
                 </div>
               </div>
 
-              {/* Floating element */}
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -bottom-6 -left-6 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl p-4 shadow-xl"
-              >
-                <div className="text-white text-sm font-medium">💰 New Payout</div>
-                <div className="text-white text-2xl font-bold">$2,450</div>
-              </motion.div>
             </motion.div>
           </div>
         </div>
@@ -397,7 +383,7 @@ export default function TeachPage() {
               How It Works
             </h2>
             <p className="text-gray-400 text-lg">
-              Get started in four simple steps. From idea to income in no time.
+              Get started in three simple steps.
             </p>
           </motion.div>
 

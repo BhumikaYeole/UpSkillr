@@ -12,6 +12,8 @@ import LearnerProfile from './pages/LearnerProfile';
 import InstructorProfile from './pages/InstructorProfile';
 import SignUp from './pages/Signup';  
 import Login from './pages/Login';
+import CreateCourse from "./pages/CreateCourse"
+import EditCourse from './pages/EditCourse';
 import ProtectedRoute from './Components/ProtectedRoute';
 
 
@@ -34,13 +36,38 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/instructor-dashboard" element={<InstructorDashboard />} />
+          <Route
+            path="/create-course"
+            element={
+              <ProtectedRoute role="instructor">
+                <CreateCourse />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/course/:courseId/edit"
+            element={
+              <ProtectedRoute role="instructor">
+                <EditCourse />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="/instructor-dashboard" element={
+              <ProtectedRoute role="instructor">
+                <InstructorDashboard />
+              </ProtectedRoute>
+            } />
           <Route path="/learner-profile" element={
             <ProtectedRoute role="learner">
                 <LearnerProfile />
               </ProtectedRoute>
             } />
-          <Route path="/instructor-profile" element={<InstructorProfile />} />
+          <Route path="/instructor-profile" element={
+              <ProtectedRoute role="instructor">
+                <InstructorProfile />
+              </ProtectedRoute>
+            } />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
         </Routes>

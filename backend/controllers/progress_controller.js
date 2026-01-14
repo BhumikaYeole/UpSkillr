@@ -145,4 +145,33 @@ export const getLearnerDashboard = async (req, res, next) => {
   }
 };
 
+export const getInstructorDashboard = async (req, res) => {
+  const instructorId = req.user._id;
+
+  const courses = await Course.find({ instructor: instructorId });
+
+  const totalCourses = courses.length;
+  const totalStudents = courses.reduce(
+    (sum, course) => sum + course.enrolledCount,
+    0
+  );
+
+  res.status(200).json({
+    success: true,
+    dashboard: {
+      totalCourses,
+      totalStudents,
+      newEnrollments: 0, 
+      publishedCourses: courses.map((course) => ({
+        _id: course._id,
+        title: course.title,
+        thumbnail: course.thumbnail,
+        students: course.enrolledCount,
+        status: "Published",
+        createdAt: course.createdAt,
+      })),
+    },
+  });
+};
+
 

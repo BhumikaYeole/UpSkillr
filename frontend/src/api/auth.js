@@ -20,6 +20,12 @@ export const getLearnerDashboardApi = async()=>{
   return data
 }
 
+export const getInstructorDashboardApi = async()=>{
+  const data = await fetchClient("/progress/instructor/dashboard")
+  return data
+}
+
+
 export const updateUserApi = async(data)=>{
   return fetchClient("/user/me", {
     method : "PUT",

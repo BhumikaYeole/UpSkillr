@@ -163,46 +163,60 @@ export const getCourses = async (req, res, next) => {
 
 // GET COURSE CURRICULUM
 
+import mongoose from "mongoose";
+
 export const getCourseCurriculum = async (req, res, next) => {
   try {
     const { courseId } = req.params;
+    const courseObjectId = new mongoose.Types.ObjectId(courseId);
 
-    const course = await Course.findById(courseId).populate("instructor", "name email expertise");
+    const course = await Course.findById(courseObjectId)
+      .populate("instructor", "name email expertise");
 
     if (!course) {
-      const error = new Error("Course not found");
-      error.statusCode = 404;
-      throw error;
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
     }
 
-    const sections = await courseSection.find({ courseId }).sort({ order: 1 });
-    // console.log(sections.length)
+    const sections = await courseSection
+      .find({ courseId: courseObjectId })
+      .sort({ order: 1 });
+      // console.log(sections)
 
-    const lessons = await Lesson.find({ courseId }).sort({ order: 1 });
-    // console.log(lessons.length)
-    const duration = lessons.reduce((total, lesson) => total + lesson.duration, 0);
-    // console.log("Total Duration:", duration);
+    const lessons = await Lesson
+      .find({ courseId: courseObjectId })
 
-    // Group lessons under each section
-    const curriculum = sections.map(section => ({
-      _id: section._id,
-      title: section.title,
-      order: section.order,
-      lessons: lessons.filter(lesson => lesson.sectionId.toString() === section._id.toString()),
-      lesson_length : lessons.length,
-      duration : duration
-    }));
+    const curriculum = sections.map((section) => {
+      const sectionLessons = lessons.filter(
+    lesson =>
+      lesson.sectionId.toString() === section._id.toString()
+  );
+
+      return {
+        _id: section._id,
+        title: section.title,
+        order: section.order,
+        lessons: sectionLessons,
+        lesson_length: sectionLessons.length,
+        duration: sectionLessons.reduce(
+          (t, l) => t + (l.duration || 0),
+          0
+        ),
+      };
+    });
 
     res.status(200).json({
       success: true,
       course,
-      curriculum
+      curriculum,
     });
-
   } catch (error) {
     next(error);
   }
 };
+
 
 
 // UPDATE COURSE

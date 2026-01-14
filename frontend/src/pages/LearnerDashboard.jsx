@@ -139,7 +139,7 @@ export default function LearnerDashboard() {
   progressData.map(p => {
     total = total + p.progressPercentage
   })
-  const overallProgress = (total / progressData?.length)
+  const overallProgress = Math.round(total / progressData?.length)
 
   const completedCoursesData = progressData
     ?.filter(p => p.progressPercentage === 100)
@@ -171,7 +171,7 @@ export default function LearnerDashboard() {
     },
     {
       icon: <Award className="w-6 h-6" />,
-      label: "Certificates Earned",
+      label: "Courses Completed",
       value: completedCourses,
       change: completedCourses > 0 ? `+${completedCourses} this month` : "+0%",
       gradient: "from-purple-400 to-pink-500"
@@ -278,13 +278,6 @@ export default function LearnerDashboard() {
                 </div>
               </motion.div>
 
-              <button className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all relative">
-                <Bell className="w-5 h-5 text-gray-400" />
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-              </button>
-              <button className="p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all">
-                <Calendar className="w-5 h-5 text-gray-400" />
-              </button>
             </div>
           </div>
 
@@ -687,7 +680,6 @@ export default function LearnerDashboard() {
               <div className="space-y-4">
                 <div className="space-y-4">
                   {courseResources.map((resource, idx) => {
-                    const isDownloaded = downloadedResources.has(resource._id);
                     // console.log(resource)
 
                     return (
@@ -717,20 +709,21 @@ export default function LearnerDashboard() {
                         {/* Action */}
                         {resource.unlocked ? (
                           <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => window.open(resource.fileUrl, "_blank")}
-                            className="w-full py-2 rounded-lg bg-gradient-to-r from-green-400 to-emerald-500 text-white text-sm font-semibold flex items-center justify-center gap-2"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => window.open(resource.fileUrl, "_blank")}
+                          className="w-full py-2 rounded-lg bg-gradient-to-r from-green-400 to-emerald-500 text-white text-sm font-semibold flex items-center justify-center gap-2"
                           >
                             <Eye className="w-4 h-4" />
-                            View / Download
+                            View 
+                            {/* {console.log(resource)} */}
                           </motion.button>
                         ) : (
                           <motion.button
-                            whileHover={{ scale: 1.03 }}
-                            whileTap={{ scale: 0.97 }}
-                            onClick={() => handleUnlockResource(resource)}
-                            className="w-full py-2 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-sm font-bold flex items-center justify-center gap-2"
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
+                          onClick={() => handleUnlockResource(resource)}
+                          className="w-full py-2 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-sm font-bold flex items-center justify-center gap-2"
                           >
                             <Lock className="w-4 h-4" />
                             Unlock for {resource.requiredCoins} coins
@@ -741,17 +734,6 @@ export default function LearnerDashboard() {
                   })}
                 </div>
                 </div>
-
-
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setCoins(coins + 25)}
-                  className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold hover:from-cyan-300 hover:to-blue-400 transition-all flex items-center justify-center gap-2"
-                >
-                  <Gift className="w-4 h-4" />
-                  Claim Daily Bonus
-                </motion.button>
               </div>
 
               {/* Quick Stats */}

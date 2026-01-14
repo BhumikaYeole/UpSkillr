@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   Mail, 
@@ -26,9 +26,28 @@ import {
   Zap,
   Trophy
 } from "lucide-react";
+import { useProfile } from "../hooks/useProfile";
 
 export default function InstructorProfile() {
   const [isEditing, setIsEditing] = useState(false);
+  const { user } = useProfile();
+  console.log(user)
+
+  useEffect(()=>{
+    if(!user) return;
+
+    const mappedData = {
+      name : user.name,
+      role : user.role,
+      email : user.email,
+      location : user.location,
+      joinedDate : user.joinedOn,
+      bio : user.about,
+      expertise : user.expertise,
+      responseTime : "2h",
+
+    }
+  }, [user])
 
   // Dynamic instructor data - can be passed as props
   const [instructorData, setInstructorData] = useState({
@@ -72,36 +91,6 @@ export default function InstructorProfile() {
     setEditForm(prev => ({ ...prev, [field]: value }));
   };
 
-  const achievements = [
-    { 
-      icon: BookOpen, 
-      title: "First Course", 
-      description: "Published your first course",
-      locked: true,
-      gradient: "from-blue-400 to-cyan-500"
-    },
-    { 
-      icon: Users, 
-      title: "100 Students", 
-      description: "Reached 100 students milestone",
-      locked: true,
-      gradient: "from-purple-400 to-pink-500"
-    },
-    { 
-      icon: Star, 
-      title: "5-Star Rating", 
-      description: "Achieved 5-star average rating",
-      locked: true,
-      gradient: "from-yellow-400 to-orange-500"
-    },
-    { 
-      icon: Trophy, 
-      title: "Top Instructor", 
-      description: "Became a top-rated instructor",
-      locked: true,
-      gradient: "from-green-400 to-emerald-500"
-    }
-  ];
 
   const stats = [
     {
@@ -136,13 +125,6 @@ export default function InstructorProfile() {
       bgColor: "from-orange-50 to-yellow-50",
       iconBg: "bg-orange-500"
     }
-  ];
-
-  const socialLinks = [
-    { icon: Globe, label: "Website", value: instructorData.website, color: "from-blue-400 to-blue-600" },
-    { icon: Linkedin, label: "LinkedIn", value: "linkedin.com/in/johndoe", color: "from-blue-500 to-blue-700" },
-    { icon: Github, label: "GitHub", value: "github.com/johndoe", color: "from-gray-600 to-gray-800" },
-    { icon: Twitter, label: "Twitter", value: "@johndoe", color: "from-sky-400 to-blue-500" }
   ];
 
   return (
@@ -367,94 +349,6 @@ export default function InstructorProfile() {
               )}
             </motion.div>
 
-            {/* Expertise */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-xl p-8"
-            >
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-white">Expertise</h2>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {instructorData.expertise.map((skill, index) => (
-                  <motion.span
-                    key={skill}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    className="px-5 py-2.5 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 backdrop-blur-xl border-2 border-cyan-400/50 rounded-xl text-cyan-300 font-semibold text-sm hover:border-cyan-400 hover:from-cyan-500/30 hover:to-blue-500/30 transition-all cursor-pointer shadow-lg"
-                  >
-                    {skill}
-                  </motion.span>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Languages */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-xl p-8"
-            >
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
-                  <Globe className="w-5 h-5 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-white">Languages</h2>
-              </div>
-              <div className="space-y-3">
-                {instructorData.languages.map((language, index) => (
-                  <motion.div 
-                    key={language}
-                    whileHover={{ x: 5 }}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10"
-                  >
-                    <CheckCircle className="w-5 h-5 text-green-400" />
-                    <span className="text-gray-200 font-medium">{language}</span>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Social Links */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-              className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-xl p-8"
-            >
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
-                  <Share2 className="w-5 h-5 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-white">Connect</h2>
-              </div>
-              <div className="space-y-3">
-                {socialLinks.map((social, index) => (
-                  <motion.a
-                    key={social.label}
-                    href="#"
-                    whileHover={{ scale: 1.02, x: 5 }}
-                    className="flex items-center gap-3 p-4 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10 hover:bg-white/10 transition-all group"
-                  >
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${social.color} flex items-center justify-center shadow-lg`}>
-                      <social.icon className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-400">{social.label}</div>
-                      <div className="text-sm font-semibold text-white">{social.value}</div>
-                    </div>
-                  </motion.a>
-                ))}
-              </div>
-            </motion.div>
           </div>
 
           {/* Right Column */}
@@ -574,71 +468,6 @@ export default function InstructorProfile() {
               </motion.div>
             )}
 
-            {/* Achievements Section */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-xl p-8"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
-                  <Trophy className="w-6 h-6 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-white">Achievements</h2>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {achievements.map((achievement, index) => (
-                  <motion.div
-                    key={achievement.title}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
-                    whileHover={{ scale: 1.05, y: -5 }}
-                    className={`p-6 rounded-2xl transition-all cursor-pointer ${
-                      achievement.locked
-                        ? 'bg-white/5 backdrop-blur-xl border border-white/10 opacity-50'
-                        : 'bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border-2 border-white/30 shadow-lg'
-                    }`}
-                  >
-                    <div className={`relative w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center ${
-                      achievement.locked
-                        ? 'bg-white/10'
-                        : `bg-gradient-to-br ${achievement.gradient} shadow-xl`
-                    }`}>
-                      {!achievement.locked && (
-                        <div className={`absolute inset-0 bg-gradient-to-br ${achievement.gradient} rounded-2xl blur-xl opacity-50`}></div>
-                      )}
-                      <achievement.icon className={`w-10 h-10 relative z-10 ${
-                        achievement.locked ? 'text-gray-600' : 'text-white'
-                      }`} />
-                    </div>
-                    <h3 className={`text-lg font-bold text-center mb-2 ${
-                      achievement.locked ? 'text-gray-500' : 'text-white'
-                    }`}>
-                      {achievement.title}
-                    </h3>
-                    <p className={`text-sm text-center ${
-                      achievement.locked ? 'text-gray-600' : 'text-gray-400'
-                    }`}>
-                      {achievement.description}
-                    </p>
-                  </motion.div>
-                ))}
-              </div>
-
-              {instructorData.totalCourses === 0 && (
-                <motion.p 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                  className="text-center text-gray-400 text-sm mt-6 bg-white/5 backdrop-blur-xl rounded-xl p-4 border border-white/10"
-                >
-                  🚀 Create courses and engage with students to unlock achievements!
-                </motion.p>
-              )}
-            </motion.div>
           </div>
         </div>
       </div>

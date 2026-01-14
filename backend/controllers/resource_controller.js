@@ -153,6 +153,7 @@ export const getCourseResources = async (req, res, next) => {
     const formatted = resources.map(r => ({
       _id: r._id,
       title: r.title,
+      fileUrl : r.fileUrl,
       type: r.type,
       size: r.fileSize,
       requiredCoins: r.requiredCoins,

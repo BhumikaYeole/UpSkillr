@@ -17,7 +17,7 @@ import {
 import { useAuth } from "../hooks/useAuth";
 import { useProfile } from "../hooks/useProfile";
 import { completeLessonApi, courseProgressApi, enrollApi, isEnrolledApi } from "../api/auth";
-
+import { getCourseCurriculumApi } from "../api/course";
 
 
 export default function CourseDetailPage() {
@@ -35,16 +35,13 @@ export default function CourseDetailPage() {
   const { user, isAuthorized } = useAuth()
   const [isEnrolled, setIsEnrolled] = useState(false)
 
-  const BASE_URL = "http://localhost:5000/api";
 
   useEffect(() => {
     window.scrollTo(0, 0);
 
     const fetchCourse = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/courses/${courseId}/curriculum`);
-        const data = await res.json();
-
+        const data = await getCourseCurriculumApi(courseId)
         setCourse(data.course);
         setCurriculum(data.curriculum);
       } catch (err) {
@@ -58,28 +55,33 @@ export default function CourseDetailPage() {
   }, [courseId])
 
   useEffect(() => {
-    const fetchEnrollment = async () => {
-      const data = await isEnrolledApi(courseId)
-      setIsEnrolled(data.enrolled)
-      refetchProfile();
-    }
-    fetchEnrollment();
+    if(!user ) return
+    if(user.role == "learner")
+    {
 
-    if (!isEnrolled || !courseId) return;
-
-    const fetchProgress = async () => {
-      try {
-        const res = await courseProgressApi(courseId);
-        setCompletedLessons(
-          res.progress.completedLessons.map(l => l._id)
-        );
-      } catch (err) {
-        console.error("Failed to fetch progress");
+      const fetchEnrollment = async () => {
+        const data = await isEnrolledApi(courseId)
+        setIsEnrolled(data.enrolled)
+        refetchProfile();
       }
-    };
-
-    fetchProgress();
-  }, [isEnrolled, courseId])
+      fetchEnrollment();
+  
+      if (!isEnrolled || !courseId) return;
+  
+      const fetchProgress = async () => {
+        try {
+          const res = await courseProgressApi(courseId);
+          setCompletedLessons(
+            res.progress.completedLessons.map(l => l._id)
+          );
+        } catch (err) {
+          console.error("Failed to fetch progress");
+        }
+      };
+  
+      fetchProgress();
+    }
+  }, [isEnrolled, courseId, refetchProfile, user])
 
 
   const toggleLessonProgress = async (lessonId) => {
