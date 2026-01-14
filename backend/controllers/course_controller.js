@@ -24,8 +24,6 @@ export const createCourse = async (req, res, next) => {
       category,
       level,
       instructor: instructorId,
-      learnings,
-      requirements
     });
 
     res.status(201).json({

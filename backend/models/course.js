@@ -35,20 +35,22 @@ const courseSchema = new mongoose.Schema(
       required: true,
     },
 
-    learnings: [
-      {
-        type: String,
-        required: true,
-      },
-    ],
+    learnings: {
+      type: [String],
+      default: [
+        "Understand core concepts",
+        "Apply knowledge through practice",
+        "Build real-world skills"
+      ],
+    },
 
-    requirements: [
-      {
-        type: String,
-      },
-    ],
-
-    
+    requirements: {
+      type: [String],
+      default: [
+        "Basic computer knowledge",
+        "Willingness to learn"
+      ],
+    },
 
     enrolledCount: {
       type: Number,
