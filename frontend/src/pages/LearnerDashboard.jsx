@@ -140,9 +140,9 @@ export default function LearnerDashboard() {
     total = total + p.progressPercentage
   })
   const overallProgress = Math.round(total / progressData?.length)
-
+  
   const completedCoursesData = progressData
-    ?.filter(p => p.progressPercentage === 100)
+    ?.filter(p => p.progressPercentage === 100 && p.course)
     .map(p => ({
       id: p.course._id,
       title: p.course.title,

@@ -20,70 +20,111 @@ import {
   Clock,
   Target,
   MessageSquare,
-  Download,
   Share2,
   Sparkles,
   Zap,
-  Trophy
+  Trophy,
+  GraduationCap,
+  GitGraph,
+  ChartSpline
 } from "lucide-react";
-import { useProfile } from "../hooks/useProfile";
+import { 
+  getMeApi, 
+  getInstructorDashboardApi, 
+  updateInstructorProfileApi 
+} from "../api/auth";
 
 export default function InstructorProfile() {
   const [isEditing, setIsEditing] = useState(false);
-  const { user } = useProfile();
-  console.log(user)
+  const [userData, setUserData] = useState(null);
+  const [editForm, setEditForm] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(()=>{
-    if(!user) return;
+  // Fetch instructor profile data
+  useEffect(() => {
+    fetchInstructorProfile();
+  }, []);
 
-    const mappedData = {
-      name : user.name,
-      role : user.role,
-      email : user.email,
-      location : user.location,
-      joinedDate : user.joinedOn,
-      bio : user.about,
-      expertise : user.expertise,
-      responseTime : "2h",
+  const fetchInstructorProfile = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+    
+    const [userResponse, dashboardResponse] = await Promise.all([
+      getMeApi(),
+      getInstructorDashboardApi()
+    ]);
+    
+    const user = userResponse.profile?.user || userResponse.user || userResponse;
+    const dashboard = dashboardResponse;
 
-    }
-  }, [user])
+    console.log(dashboard)
+    
+    const mappedUserData = {
+      name: user.name || "Instructor",
+      role: user.role || "instructor",
+      title: user.title || "Senior Full-Stack Developer & Educator",
+      email: user.email || "",
+      location: user.location || "—",
+      joinedDate: user.createdAt || user.timestamps?.createdAt
+        ? new Date(user.createdAt || user.timestamps.createdAt).toLocaleDateString("en-US", {
+            month: "long",
+            year: "numeric"
+          })
+        : new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+      bio: user.about || user.bio || "Passionate educator with years of industry experience.",
+      website: user.website || "—",
+      experience : user.experience || "Begineer",
+      expertise: userResponse.profile?.expertise || user.expertise || ["Web Development", "Programming"],
+      totalCourses: dashboard.dashboard.totalCourses || 0,
+      totalStudents: dashboard.dashboard.totalStudents || 0,
+    };
 
-  // Dynamic instructor data - can be passed as props
-  const [instructorData, setInstructorData] = useState({
-    name: "John Doe",
-    role: "Instructor",
-    title: "Senior Full-Stack Developer & Educator",
-    email: "john.doe@example.com",
-    location: "San Francisco, CA",
-    joinedDate: "January 2024",
-    bio: "Passionate educator with 10+ years of industry experience. I love teaching and helping students achieve their career goals through practical, real-world projects.",
-    website: "johndoe.dev",
-    expertise: ["Web Development", "React", "Node.js", "Python", "System Design"],
-    totalCourses: 0,
-    totalStudents: 0,
-    totalRevenue: 0,
-    averageRating: 0,
-    totalReviews: 0,
-    teachingHours: 0,
-    responseTime: "2h",
-    languages: ["English", "Spanish"]
-  });
 
-  const [editForm, setEditForm] = useState(instructorData);
+    setUserData(mappedUserData);
+    setEditForm(mappedUserData);
+  } catch (err) {
+    console.error("Error fetching instructor profile:", err);
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleEdit = () => {
-    setEditForm(instructorData);
+    setEditForm(userData);
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    setInstructorData(editForm);
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      const payload = {
+        name: editForm.name,
+        title: editForm.title,
+        // email: editForm.email,
+        location: editForm.location,
+        bio: editForm.bio,
+        website: editForm.website,
+        expertise: editForm.expertise,
+      };
+
+      await updateInstructorProfileApi(payload);
+      
+      setUserData(prev => ({
+        ...prev,
+        ...payload
+      }));
+
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Profile update failed:", err);
+      alert("Failed to update profile. Please try again.");
+    }
   };
 
   const handleCancel = () => {
-    setEditForm(instructorData);
+    setEditForm(userData);
     setIsEditing(false);
   };
 
@@ -91,12 +132,41 @@ export default function InstructorProfile() {
     setEditForm(prev => ({ ...prev, [field]: value }));
   };
 
+  // Loading state
+  if (loading || !userData || !editForm) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0a0e27] via-[#1a1f3a] to-[#0f1729] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white text-xl">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0a0e27] via-[#1a1f3a] to-[#0f1729] flex items-center justify-center">
+        <div className="text-center bg-red-500/10 backdrop-blur-xl border border-red-500/20 rounded-3xl p-8 max-w-md">
+          <p className="text-red-400 text-xl mb-4">Error loading profile</p>
+          <p className="text-gray-400 mb-6">{error}</p>
+          <button
+            onClick={fetchInstructorProfile}
+            className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold rounded-xl"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const stats = [
     {
       icon: BookOpen,
       label: "Total Courses",
-      value: instructorData.totalCourses,
+      value: userData.totalCourses,
       color: "from-blue-400 to-cyan-500",
       bgColor: "from-blue-50 to-cyan-50",
       iconBg: "bg-blue-500"
@@ -104,23 +174,23 @@ export default function InstructorProfile() {
     {
       icon: Users,
       label: "Total Students",
-      value: instructorData.totalStudents.toLocaleString(),
+      value: userData.totalStudents.toLocaleString(),
       color: "from-purple-400 to-pink-500",
       bgColor: "from-purple-50 to-pink-50",
       iconBg: "bg-purple-500"
     },
     {
-      icon: DollarSign,
-      label: "Total Revenue",
-      value: `$${instructorData.totalRevenue.toLocaleString()}`,
+      icon: GraduationCap,
+      label: "Expertise",
+      value: userData.expertise,
       color: "from-green-400 to-emerald-500",
       bgColor: "from-green-50 to-emerald-50",
       iconBg: "bg-green-500"
     },
     {
-      icon: Star,
-      label: "Average Rating",
-      value: instructorData.averageRating > 0 ? instructorData.averageRating.toFixed(1) : "0.0",
+      icon: ChartSpline,
+      label: "Experience",
+      value: userData.experience ,
       color: "from-orange-400 to-yellow-500",
       bgColor: "from-orange-50 to-yellow-50",
       iconBg: "bg-orange-500"
@@ -152,16 +222,7 @@ export default function InstructorProfile() {
             <div className="absolute top-20 right-20 w-2 h-2 bg-white rounded-full animate-ping" style={{animationDelay: '0.5s'}}></div>
             <div className="absolute bottom-10 left-1/3 w-2 h-2 bg-white rounded-full animate-ping" style={{animationDelay: '1s'}}></div>
             
-            <div className="absolute top-6 right-6 flex gap-3">
-              <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-6 py-3 bg-white/20 backdrop-blur-xl rounded-2xl text-white font-semibold hover:bg-white/30 transition-all flex items-center gap-2 shadow-lg border border-white/30"
-              >
-                <Share2 className="w-4 h-4" />
-                Share
-              </motion.button>
-            </div>
+            
           </div>
 
           {/* Profile Info */}
@@ -175,7 +236,7 @@ export default function InstructorProfile() {
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-purple-500 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
                   <div className="relative w-48 h-48 rounded-3xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 flex items-center justify-center text-white text-7xl font-bold shadow-2xl border-4 border-white/20">
-                    {instructorData.name.charAt(0)}
+                    {userData.name.charAt(0)}
                     <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center border-4 border-[#0a0e27]">
                       <Sparkles className="w-4 h-4 text-white" />
                     </div>
@@ -193,10 +254,10 @@ export default function InstructorProfile() {
                       />
                     ) : (
                       <h1 className="text-4xl md:text-5xl font-bold text-white">
-                        {instructorData.name}
+                        {userData.name}
                       </h1>
                     )}
-                    {instructorData.averageRating >= 4.5 && (
+                    {userData.averageRating >= 4.5 && (
                       <motion.div 
                         whileHover={{ scale: 1.1 }}
                         className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full shadow-lg"
@@ -214,39 +275,31 @@ export default function InstructorProfile() {
                       className="text-xl text-gray-300 mb-3 bg-white/10 backdrop-blur-xl border-2 border-white/20 rounded-xl px-4 py-2 focus:border-cyan-400 focus:outline-none w-full"
                     />
                   ) : (
-                    <p className="text-xl text-gray-300 mb-3">{instructorData.title}</p>
+                    <p className="text-xl text-gray-300 mb-3">{userData.title}</p>
                   )}
-                  <div className="flex items-center gap-4 text-sm text-gray-400 justify-center sm:justify-start flex-wrap">
-                    <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-1 bg-white/5 px-3 py-1.5 rounded-full backdrop-blur-xl">
-                      <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                      <span className="font-semibold text-white">
-                        {instructorData.averageRating > 0 ? instructorData.averageRating.toFixed(1) : "0.0"}
-                      </span>
-                      {instructorData.totalReviews > 0 && (
-                        <span>({instructorData.totalReviews})</span>
-                      )}
-                    </motion.div>
-                    <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-1 bg-white/5 px-3 py-1.5 rounded-full backdrop-blur-xl">
-                      <Users className="w-4 h-4 text-cyan-400" />
-                      <span className="text-white">{instructorData.totalStudents.toLocaleString()} students</span>
-                    </motion.div>
-                    <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-1 bg-white/5 px-3 py-1.5 rounded-full backdrop-blur-xl">
-                      <BookOpen className="w-4 h-4 text-purple-400" />
-                      <span className="text-white">{instructorData.totalCourses} courses</span>
-                    </motion.div>
-                  </div>
                 </div>
               </div>
 
-              <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleEdit}
-                className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold rounded-2xl shadow-lg hover:shadow-cyan-500/50 transition-all flex items-center gap-2 self-center lg:self-end border border-cyan-400/50"
-              >
-                <Edit2 className="w-5 h-5" />
-                Edit Profile
-              </motion.button>
+              {!isEditing ? (
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleEdit}
+                  className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold rounded-2xl shadow-lg hover:shadow-cyan-500/50 transition-all flex items-center gap-2 self-center lg:self-end border border-cyan-400/50"
+                >
+                  <Edit2 className="w-5 h-5" />
+                  Edit Profile
+                </motion.button>
+              ) : (
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleCancel}
+                  className="px-8 py-4 bg-white/10 backdrop-blur-xl border border-white/20 text-white font-bold rounded-2xl hover:bg-white/20 transition-all flex items-center gap-2 self-center lg:self-end"
+                >
+                  Cancel
+                </motion.button>
+              )}
             </div>
           </div>
         </motion.div>
@@ -276,7 +329,7 @@ export default function InstructorProfile() {
                   placeholder="Tell us about yourself..."
                 />
               ) : (
-                <p className="text-gray-300 mb-6 leading-relaxed">{instructorData.bio}</p>
+                <p className="text-gray-300 mb-6 leading-relaxed">{userData.bio}</p>
               )}
               
               <div className="space-y-3">
@@ -284,16 +337,8 @@ export default function InstructorProfile() {
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
                     <Mail className="w-5 h-5 text-white" />
                   </div>
-                  {isEditing ? (
-                    <input
-                      type="email"
-                      value={editForm.email}
-                      onChange={(e) => handleChange('email', e.target.value)}
-                      className="flex-1 px-3 py-2 border-2 border-white/20 rounded-lg focus:border-cyan-400 focus:outline-none text-sm bg-white/5 text-white"
-                    />
-                  ) : (
-                    <span className="text-sm">{instructorData.email}</span>
-                  )}
+                  {/*  ALWAYS SHOW EMAIL AS READ-ONLY */}
+                  <span className="text-sm">{userData.email}</span>
                 </motion.div>
                 
                 <motion.div whileHover={{ x: 5 }} className="flex items-center gap-3 text-gray-300 p-3 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
@@ -308,7 +353,7 @@ export default function InstructorProfile() {
                       className="flex-1 px-3 py-2 border-2 border-white/20 rounded-lg focus:border-cyan-400 focus:outline-none text-sm bg-white/5 text-white"
                     />
                   ) : (
-                    <span className="text-sm">{instructorData.location}</span>
+                    <span className="text-sm">{userData.location}</span>
                   )}
                 </motion.div>
                 
@@ -316,14 +361,14 @@ export default function InstructorProfile() {
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center">
                     <Calendar className="w-5 h-5 text-white" />
                   </div>
-                  <span className="text-sm">Teaching since {instructorData.joinedDate}</span>
+                  <span className="text-sm">Teaching since {userData.joinedDate}</span>
                 </motion.div>
 
                 <motion.div whileHover={{ x: 5 }} className="flex items-center gap-3 text-gray-300 p-3 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
                     <Clock className="w-5 h-5 text-white" />
                   </div>
-                  <span className="text-sm">Responds in {instructorData.responseTime}</span>
+                  <span className="text-sm">Responds in 2hr</span>
                 </motion.div>
               </div>
 
@@ -348,7 +393,6 @@ export default function InstructorProfile() {
                 </div>
               )}
             </motion.div>
-
           </div>
 
           {/* Right Column */}
@@ -373,7 +417,7 @@ export default function InstructorProfile() {
                 </div>
               </div>
 
-              {instructorData.totalCourses === 0 ? (
+              {userData.totalCourses === 0 ? (
                 <div className="text-center py-16">
                   <motion.div
                     initial={{ scale: 0 }}
@@ -395,6 +439,7 @@ export default function InstructorProfile() {
                   <motion.button
                     whileHover={{ scale: 1.05, y: -2 }}
                     whileTap={{ scale: 0.95 }}
+                    onClick={()=> window.location.href = "/create-course"}
                     className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold rounded-2xl shadow-lg hover:shadow-cyan-500/50 transition-all border border-cyan-400/50"
                   >
                     Create Your First Course
@@ -428,46 +473,7 @@ export default function InstructorProfile() {
               )}
             </motion.div>
 
-            {/* Additional Stats */}
-            {instructorData.totalCourses > 0 && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-                className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl shadow-2xl p-8 text-white border border-purple-400/50"
-              >
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-xl flex items-center justify-center">
-                    <Target className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold">Teaching Impact</h3>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  <motion.div whileHover={{ scale: 1.05 }} className="text-center p-4 rounded-2xl bg-white/10 backdrop-blur-xl">
-                    <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <Video className="w-8 h-8" />
-                    </div>
-                    <div className="text-3xl font-bold mb-1">{instructorData.teachingHours}h</div>
-                    <div className="text-sm text-white/80">Teaching Hours</div>
-                  </motion.div>
-                  <motion.div whileHover={{ scale: 1.05 }} className="text-center p-4 rounded-2xl bg-white/10 backdrop-blur-xl">
-                    <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <MessageSquare className="w-8 h-8" />
-                    </div>
-                    <div className="text-3xl font-bold mb-1">{instructorData.responseTime}</div>
-                    <div className="text-sm text-white/80">Avg Response Time</div>
-                  </motion.div>
-                  <motion.div whileHover={{ scale: 1.05 }} className="text-center p-4 rounded-2xl bg-white/10 backdrop-blur-xl">
-                    <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <Target className="w-8 h-8" />
-                    </div>
-                    <div className="text-3xl font-bold mb-1">98%</div>
-                    <div className="text-sm text-white/80">Completion Rate</div>
-                  </motion.div>
-                </div>
-              </motion.div>
-            )}
-
+           
           </div>
         </div>
       </div>

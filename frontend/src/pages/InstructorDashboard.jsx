@@ -119,12 +119,6 @@ export default function InstructorDashboard() {
                 </motion.button>
               </Link>
 
-              <button className="p-3 rounded-xl bg-white/5 border border-white/10">
-                <Bell className="w-5 h-5 text-gray-400" />
-              </button>
-              <button className="p-3 rounded-xl bg-white/5 border border-white/10">
-                <Calendar className="w-5 h-5 text-gray-400" />
-              </button>
             </div>
           </div>
 
@@ -211,8 +205,6 @@ export default function InstructorDashboard() {
                             Edit
                           </button>
                         </Link>
-
-
 
                         <button
                           onClick={() => handleDeleteCourse(course._id)}

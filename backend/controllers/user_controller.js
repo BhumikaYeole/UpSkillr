@@ -20,16 +20,24 @@ export const getUserProfile = async (req, res, next) => {
     let extraData = {};
 
     // Instructor-specific data
-    if (user.role === "instructor") {
-      const courses = await Course.find({ instructor: userId }).select(
-        "title thumbnail enrolledCount"
-      );
+  if (user.role === "instructor") {
+    const courses = await Course.find({ instructor: userId }).select(
+      "title thumbnail enrolledCount"
+    );
 
-      extraData = {
-        publishedCourses: courses,
-        expertise: user.expertise,
-      };
-    }
+    // Calculate total students
+    const totalStudents = courses.reduce((sum, course) => sum + (course.enrolledCount || 0), 0);
+
+    extraData = {
+      publishedCourses: courses,
+      expertise: user.expertise,
+      dashboard: {
+        totalCourses: courses.length,
+        totalStudents: totalStudents,
+        publishedCourses: courses
+      }
+    };
+  }
 
     // Learner-specific data
     if (user.role === "learner") {

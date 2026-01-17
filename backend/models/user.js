@@ -32,17 +32,15 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
     },
 
-
     coins: {
       type: Number,
-      default: 0, // instructor won't use it, learners will earn coins
+      default: 0,
     },
 
-
+    // ✅ CHANGE THIS - Make expertise accept both String and Array
     expertise: {
-      type: String,
-      default: null,
-      trim: true,
+      type: [String], // Array of strings
+      default: [],
     },
 
     experience: {
@@ -50,6 +48,7 @@ const userSchema = new mongoose.Schema(
       default: null,
       trim: true,
     },
+
     about: {
       type: String,
       trim: true,
@@ -57,6 +56,37 @@ const userSchema = new mongoose.Schema(
     },
 
     location: {
+      type: String,
+      trim: true,
+    },
+
+    // instructor profile
+    title: {
+      type: String,
+      trim: true,
+    },
+
+    website: {
+      type: String,
+      trim: true,
+    },
+
+    languages: {
+      type: [String],
+      default: ["English"],
+    },
+
+    linkedIn: {
+      type: String,
+      trim: true,
+    },
+
+    github: {
+      type: String,
+      trim: true,
+    },
+
+    twitter: {
       type: String,
       trim: true,
     },
@@ -70,8 +100,6 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
-
 
 const User = mongoose.model("User", userSchema);
 

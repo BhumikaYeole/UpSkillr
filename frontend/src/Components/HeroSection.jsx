@@ -1,66 +1,25 @@
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { Play, GraduationCap, Users, BookOpen, Star } from "lucide-react";
-import { useEffect } from "react";
-import { Link } from "react-router-dom";
 
 export default function HeroSection() {
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      mouseX.set(e.clientX - window.innerWidth / 2);
-      mouseY.set(e.clientY - window.innerHeight / 2);
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [mouseX, mouseY]);
-
-  const moveSlow = (factor) => ({
-    x: useTransform(mouseX, (v) => v * factor),
-    y: useTransform(mouseY, (v) => v * factor),
-  });
-
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-[#0a1525] via-[#050b14] to-[#0f1a2a] text-white overflow-hidden">
-      {/* Animated Background Blobs */}
+      {/* Static Background Blobs */}
       <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          animate={{ 
-            scale: [1, 1.2, 1],
-            opacity: [0.15, 0.25, 0.15],
-          }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-20 left-20 w-96 h-96 bg-cyan-400/20 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ 
-            scale: [1.2, 1, 1.2],
-            opacity: [0.1, 0.2, 0.1],
-          }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ 
-            scale: [1, 1.3, 1],
-            opacity: [0.1, 0.15, 0.1],
-          }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl"
-        />
+        <div className="absolute top-20 left-20 w-96 h-96 bg-cyan-400/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl" />
       </div>
 
       {/* FLOATING ELEMENTS */}
       <div className="absolute inset-0 pointer-events-none hidden md:block">
         {/* Certificate - Top Left */}
         <motion.div
-          style={moveSlow(0.02)}
           animate={{ 
-            y: [0, -20, 0],
-            rotate: [-2, 2, -2]
+            y: [0, -10, 0],
+            rotate: [-1, 1, -1]
           }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           className="absolute top-32 left-16 w-72 h-44 rounded-2xl bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 backdrop-blur-md p-6 shadow-2xl"
         >
           <div className="flex items-center gap-2 mb-3">
@@ -78,12 +37,11 @@ export default function HeroSection() {
 
         {/* Book - Bottom Left */}
         <motion.div
-          style={moveSlow(0.04)}
           animate={{ 
-            y: [0, 30, 0],
-            rotate: [2, -2, 2]
+            y: [0, 12, 0],
+            rotate: [1, -4, 1]
           }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
           className="absolute bottom-32 left-20 w-64 h-40 rounded-2xl bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 backdrop-blur-md p-6 shadow-2xl"
         >
           <div className="flex items-center gap-2 mb-3">
@@ -102,12 +60,11 @@ export default function HeroSection() {
 
         {/* Document - Top Right */}
         <motion.div
-          style={moveSlow(0.03)}
           animate={{ 
-            y: [0, -25, 0],
-            rotate: [2, -1, 2]
+            y: [0, -8, 0],
+            rotate: [1, -0.5, 1]
           }}
-          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
           className="absolute top-40 right-20 w-72 h-44 rounded-2xl bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 backdrop-blur-md p-6 shadow-2xl"
         >
           <div className="flex items-center gap-2 mb-4">
@@ -134,12 +91,11 @@ export default function HeroSection() {
 
         {/* Additional Certificate - Bottom Right */}
         <motion.div
-          style={moveSlow(0.025)}
           animate={{ 
-            y: [0, 20, 0],
-            rotate: [-1, 1, -1]
+            y: [0, 10, 0],
+            rotate: [-0.5, 1.5, -0.5]
           }}
-          transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
           className="absolute bottom-40 right-32 w-64 h-40 rounded-2xl bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 backdrop-blur-md p-6 shadow-2xl"
         >
           <div className="flex items-center gap-2 mb-3">
@@ -194,16 +150,14 @@ export default function HeroSection() {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="flex flex-col sm:flex-row gap-4 mt-10"
         >
-          <Link to="/courses">
-            <motion.button
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-400 to-cyan-500 text-[#050b14] font-semibold shadow-lg shadow-cyan-400/25 hover:shadow-xl hover:shadow-cyan-400/40 transition-all duration-300 flex items-center justify-center gap-2"
-            >
-              Start Learning Free
-              <span className="text-lg">→</span>
-            </motion.button>
-          </Link>
+          <motion.button
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-400 to-cyan-500 text-[#050b14] font-semibold shadow-lg shadow-cyan-400/25 hover:shadow-xl hover:shadow-cyan-400/40 transition-all duration-300 flex items-center justify-center gap-2"
+          >
+            Start Learning Free
+            <span className="text-lg">→</span>
+          </motion.button>
           <motion.button
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
@@ -214,7 +168,7 @@ export default function HeroSection() {
             Watch Demo
           </motion.button>
         </motion.div>
-
+        
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -229,7 +183,7 @@ export default function HeroSection() {
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}                       
               transition={{ duration: 0.6, delay: 1 + idx * 0.1 }}
               className="flex flex-col items-center"
             >
@@ -237,7 +191,7 @@ export default function HeroSection() {
               <h3 className="text-4xl font-bold">{stat.value}</h3>
               <p className="text-gray-400 mt-1">{stat.label}</p>
             </motion.div>
-          ))}
+          ))} 
         </motion.div>
       </div>
     </section>
