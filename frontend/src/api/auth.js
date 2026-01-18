@@ -98,3 +98,62 @@ export const getInstructorCoursesApi = async () => {
   const data = await fetchClient("/instructor/courses");
   return data;
 }
+
+export const checkAssessmentSubmissionApi = async (courseId) => {
+  const token = localStorage.getItem('token');
+  const response = await fetchClient(`/assessments/submission/${courseId}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  return await response;
+};
+
+// Fetch certificate data (returns JSON, not PDF)
+export const fetchCertificate = async (courseId) => {
+  const token = localStorage.getItem("token");
+  
+  const response = await fetchClient(`/certificates/course/${courseId}/certificate`, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    }
+  });
+
+  const data = await response.data;
+  
+  // Format the date
+  const formatted = {
+      certificateId: data.certificateId,
+      learnerName: data.learnerName,
+      courseTitle: data.courseTitle,
+      instructorName: data.instructorName,
+      score: data.score,
+      status: data.status,
+      dateIssued: new Date(data.dateIssued).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      })
+    };
+    return formatted;
+};
+    
+export const verifyCertificateApi = async(certificateId) =>{
+  const response = await fetchClient(`/certificates/${certificateId}`)
+
+  const data = await response.data;
+  const formatted = {
+      name: data.name,
+      course: data.course,
+      instructor: data.instructor,
+      score: data.score,
+      date: new Date(data.date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      })
+    };
+    return formatted;
+
+}

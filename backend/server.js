@@ -10,13 +10,17 @@ import progressRouter from "./routes/progress_routes.js"
 import resourceRouter from "./routes/resource_routes.js"
 import userRouter from "./routes/user_routes.js"    
 import certificateRouter from "./routes/certificate_routes.js"
+import router from "./routes/assessment_routes.js"
 import cors from "cors"
 
 const app = express()
 
 app.use(express.json())
 app.use(cookieParser())
-app.use(cors())
+app.use(cors({
+  origin: "http://localhost:5173", 
+  credentials: true
+}));
 
 app.use(express.urlencoded({extended : false}))
 
@@ -27,6 +31,7 @@ app.use("/api/progress", progressRouter)
 app.use("/api/resources", resourceRouter)
 app.use("/api/user", userRouter)
 app.use("/api/certificates", certificateRouter)
+app.use("/api/assessments", router)
 
 app.use(errorMiddleware)
 app.use(authorize)

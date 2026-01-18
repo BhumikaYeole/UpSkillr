@@ -25,11 +25,17 @@ import {
   BookOpenIcon
 } from "lucide-react";
 import { courseProgressApi, fetchActiveCoursesApi, fetchCoursesApi, getMeApi, getCourseResourcesApi, downloadResourceApi } from "../api/auth";
+import { checkAssessmentSubmissionApi, fetchCertificate } from "../api/auth";
+import CertificateModal from "../Components/CertificateModal";
+
+
 import { useNavigate } from "react-router-dom";
 import { useProfile } from "../hooks/useProfile";
 
 export default function LearnerDashboard() {
   const [userData, setUserData] = useState(null);
+
+  const { user, loading, learningTime, progressData, completedCourses, refetchProfile } = useProfile();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -37,26 +43,24 @@ export default function LearnerDashboard() {
       setUserData(data.profile);
     }
     fetchUserData();
-  }, [])
+  }, [user])
 
   const name = userData ? userData.user.name : "User";
   const coins = userData ? userData.user.coins : 0;
   const enrolledCoursesCount = userData ? userData.enrolledCourses.length : 0;
-  const enrolledCourses = userData ? userData.enrolledCourses : []; // Total completed courses
-  const [inProgressCourses, setInProgressCourses] = useState(0); // Courses in progress
+  const enrolledCourses = userData ? userData.enrolledCourses : [];
+  const [inProgressCourses, setInProgressCourses] = useState(0);
   const [recommendedCourses, setRecommendedCourses] = useState([])
   const [activeCourses, setActiveCourses] = useState([])
   const [courseResources, setCourseResources] = useState([]);
   const [downloadedResources, setDownloadedResources] = useState(new Set());
-
-
-
-  const { user, loading, learningTime, progressData, completedCourses, refetchProfile } = useProfile();
+  const [showCertificate, setShowCertificate] = useState(false);
+  const [certificateData, setCertificateData] = useState(null);
+  const [loadingCertificate, setLoadingCertificate] = useState(false);
 
 
   useEffect(() => {
     const fetchCourses = async () => {
-
       const data = await fetchCoursesApi();
       setRecommendedCourses(data.courses.slice(0, 3))
     }
@@ -75,13 +79,12 @@ export default function LearnerDashboard() {
         category: e.course.category,
         thumbnail: e.course.thumbnail,
         lastAccessed: new Date(e.enrolledAt).toLocaleDateString(),
-        progress: 0 // placeholder, fetched next
+        progress: 0
       }));
 
       setActiveCourses(mapped);
     }
     fetchActiveCourses();
-
   }, [])
 
   useEffect(() => {
@@ -124,7 +127,6 @@ export default function LearnerDashboard() {
           })
         );
 
-
         setCourseResources(responses.flat());
       } catch (err) {
         console.error("Failed to load resources", err);
@@ -134,32 +136,84 @@ export default function LearnerDashboard() {
     fetchResources();
   }, [activeCourses]);
 
-
   let total = 0;
   progressData.map(p => {
     total = total + p.progressPercentage
   })
   const overallProgress = Math.round(total / progressData?.length)
-  
-  const completedCoursesData = progressData
-    ?.filter(p => p.progressPercentage === 100 && p.course)
-    .map(p => ({
-      id: p.course._id,
-      title: p.course.title,
-      image: p.course.thumbnail,
-      lessonsCount: p.completedLessons.length,
-      enrolledDate: new Date(p.createdAt).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric"
-      }),
-      completedDate: new Date(p.updatedAt).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric"
-      })
-    })) || [];
 
+  const [completedCoursesData, setCompletedCoursesData] = useState([]);
+
+  // Create initial completed courses data
+  useEffect(() => {
+    const initialData = progressData
+      ?.filter(p => p.progressPercentage === 100 && p.course)
+      .map(p => ({
+        id: p.course._id,
+        title: p.course.title,
+        image: p.course.thumbnail,
+        lessonsCount: p.completedLessons.length,
+        enrolledDate: new Date(p.createdAt).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric"
+        }),
+        completedDate: new Date(p.updatedAt).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric"
+        }),
+        assessmentTaken: false,
+        assessmentScore: null,
+        assessmentStatus: null
+      })) || [];
+
+    setCompletedCoursesData(initialData);
+  }, [progressData]);
+
+  // Fetch submission status for each completed course
+  useEffect(() => {
+    if (!completedCoursesData.length) return;
+
+    const fetchSubmissions = async () => {
+      const updated = await Promise.all(
+        completedCoursesData.map(async (course) => {
+          try {
+            const res = await checkAssessmentSubmissionApi(course.id);
+            if (res.hasSubmission) {
+              return {
+                ...course,
+                assessmentTaken: true,
+                assessmentScore: res.data.percentage,
+                assessmentStatus: res.data.status
+              };
+            }
+            return course;
+          } catch (err) {
+            console.error('Failed to fetch submission:', err);
+            return course;
+          }
+        })
+      );
+      setCompletedCoursesData(updated);
+    };
+
+    fetchSubmissions();
+  }, [completedCoursesData.length]);
+
+
+  const handleViewCertificate = async (courseId) => {
+    setLoadingCertificate(true);
+    try {
+      const data = await fetchCertificate(courseId);
+      setCertificateData(data);
+      setShowCertificate(true);
+    } catch (err) {
+      alert(err.message || "Complete the course to unlock certificate");
+    } finally {
+      setLoadingCertificate(false);
+    }
+  };
 
   const stats = [
     {
@@ -227,17 +281,10 @@ export default function LearnerDashboard() {
 
   const handleUnlockResource = async (resourceId) => {
     try {
-      // console.log(resourceId._id)
       const res = await downloadResourceApi(resourceId._id);
-
-      // Open file securely
       window.open(res.fileUrl, "_blank");
-
       setDownloadedResources(prev => new Set(prev).add(resourceId._id));
-
-      // Refresh profile to sync coins
       refetchProfile();
-
     } catch (err) {
       alert(err.message || "Download failed");
     }
@@ -277,10 +324,8 @@ export default function LearnerDashboard() {
                   <div className="text-lg font-bold text-white">{coins}</div>
                 </div>
               </motion.div>
-
             </div>
           </div>
-
         </motion.div>
 
         {/* Stats Cards */}
@@ -483,7 +528,6 @@ export default function LearnerDashboard() {
                       </div>
                       <span className="text-white font-medium">{enrolledCoursesCount - completedCourses}</span>
                     </div>
-
                   </div>
                 </div>
               </motion.div>
@@ -611,7 +655,7 @@ export default function LearnerDashboard() {
               )}
             </motion.div>
 
-            {/* Completed Courses */}
+            {/* Completed Courses - WITH ASSESSMENT BUTTON */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -619,44 +663,113 @@ export default function LearnerDashboard() {
             >
               <h2 className="text-2xl font-bold text-white mb-4">Completed Courses</h2>
 
-              {completedCoursesData.map((course) => (
-                <motion.div
-                  key={course.id}
-                  whileHover={{ y: -5 }}
-                  className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden hover:border-green-400/50 transition-all"
-                >
-                  <div className="flex gap-4 p-4">
-                    <div className="relative">
-                      <img
-                        src={course.image}
-                        alt={course.title}
-                        className="w-24 h-24 rounded-xl object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/40 rounded-xl flex items-center justify-center">
-                        <div className="w-10 h-10 rounded-full bg-green-400 flex items-center justify-center">
-                          <Award className="w-5 h-5 text-white" />
+              {completedCoursesData.length > 0 ? (
+                <div className="space-y-4">
+                  {completedCoursesData.map((course) => (
+                    <motion.div
+                      key={course.id}
+                      whileHover={{ y: -5 }}
+                      className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden hover:border-green-400/50 transition-all"
+                    >
+                      <div className="flex gap-4 p-4">
+                        <div className="relative">
+                          <img
+                            src={course.image}
+                            alt={course.title}
+                            className="w-24 h-24 rounded-xl object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/40 rounded-xl flex items-center justify-center">
+                            <div className="w-10 h-10 rounded-full bg-green-400 flex items-center justify-center">
+                              <Award className="w-5 h-5 text-white" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex-1">
+                          <span className="text-xs text-green-400 font-medium">
+                            {course.lessonsCount} lessons completed
+                          </span>
+
+                          <h3 className="text-white font-bold text-sm mt-1 mb-2">
+                            {course.title}
+                          </h3>
+
+                          <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
+                            <Calendar className="w-3 h-3" />
+                            <span>Completed: {course.completedDate}</span>
+                          </div>
+
+
+                          {/* Assessment Button */}
+                          {/* Assessment Status */}
+                          {course.assessmentTaken ? (
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                {course.assessmentStatus === 'PASS' ? (
+                                  <>
+                                    <div className="w-5 h-5 rounded-full bg-green-400 flex items-center justify-center">
+                                      <Award className="w-3 h-3 text-white" />
+                                    </div>
+                                    <div>
+                                      <div className="text-green-400 text-xs font-semibold">Assessment Completed</div>
+                                      <div className="text-green-300 text-xs">Score: {course.assessmentScore}%</div>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <>
+                                    <div className="w-5 h-5 rounded-full bg-red-400 flex items-center justify-center">
+                                      <span className="text-white text-xs">✗</span>
+                                    </div>
+                                    <div>
+                                      <div className="text-red-400 text-xs font-semibold">Assessment Failed</div>
+                                      <div className="text-red-300 text-xs">Score: {course.assessmentScore}%</div>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+
+                              {/* Conditional Button */}
+                              {course.assessmentStatus === 'PASS' ? (
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() => handleViewCertificate(course.id)}
+                                  disabled={loadingCertificate}
+                                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 text-white text-xs font-semibold hover:from-cyan-300 hover:to-blue-400 transition-all disabled:opacity-50"
+                                >
+                                  {loadingCertificate ? 'Loading...' : 'View Certificate'}
+                                </motion.button>
+                              ) : (
+                                <div className="px-3 py-2 rounded-lg text-red-400 text-xs font-medium border border-red-400/30 bg-red-400/5">
+                                  No Certificate
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => navigate(`/courses/${course.id}/assessment`)}
+                              className="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-purple-400 to-pink-500 text-white text-sm font-semibold hover:from-purple-300 hover:to-pink-400 transition-all flex items-center justify-center gap-2"
+                            >
+                              <Target className="w-4 h-4" />
+                              Take Assessment Test
+                            </motion.button>
+                          )}
                         </div>
                       </div>
-                    </div>
-
-                    <div className="flex-1">
-                      <span className="text-xs text-green-400 font-medium">
-                        {course.lessonsCount} lessons completed
-                      </span>
-
-                      <h3 className="text-white font-bold text-sm mt-1 mb-2">
-                        {course.title}
-                      </h3>
-
-                      <div className="flex items-center gap-2 text-xs text-gray-400">
-                        <Calendar className="w-3 h-3" />
-                        <span>Completed: {course.completedDate}</span>
-                      </div>
-                    </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-white/5 backdrop-blur-xl border border-white/10 border-dashed rounded-2xl p-12 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-green-400/20 to-emerald-400/20 flex items-center justify-center">
+                    <Award className="w-8 h-8 text-green-400" />
                   </div>
-                </motion.div>
-              ))}
-
+                  <h3 className="text-xl font-bold text-white mb-2">No Completed Courses Yet</h3>
+                  <p className="text-gray-400">Complete your first course to earn a certificate!</p>
+                </div>
+              )}
             </motion.div>
           </div>
 
@@ -678,114 +791,112 @@ export default function LearnerDashboard() {
               </div>
 
               <div className="space-y-4">
-                <div className="space-y-4">
-                  {courseResources.map((resource, idx) => {
-                    // console.log(resource)
+                {courseResources.map((resource, idx) => {
+                  const isDownloaded = downloadedResources.has(resource._id);
 
-                    return (
-                      <motion.div
-                        key={resource._id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.4, delay: 0.3 + idx * 0.1 }}
-                        className="group bg-gradient-to-br from-white/10 to-white/5 border border-white/10 rounded-xl p-4 hover:border-cyan-400/40 transition-all"
-                      >
-                        {/* Header */}
-                        <div className="flex items-start gap-3 mb-4">
-                          {/* File Icon */}
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white">
-                            <FileText className="w-5 h-5" />
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-white font-semibold text-sm truncate">
-                              {resource.title}
-                            </h4>
-                            <p className="text-xs text-gray-400">Course : {resource.courseTitle}</p>
-                            <p className="text-xs text-gray-500">Size : {resource.size} MB</p>
-                          </div>
+                  return (
+                    <motion.div
+                      key={resource._id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.4, delay: 0.3 + idx * 0.1 }}
+                      className="group bg-gradient-to-br from-white/10 to-white/5 border border-white/10 rounded-xl p-4 hover:border-cyan-400/40 transition-all"
+                    >
+                      {/* Header */}
+                      <div className="flex items-start gap-3 mb-4">
+                        {/* File Icon */}
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white">
+                          <FileText className="w-5 h-5" />
                         </div>
 
-                        {/* Action */}
-                        {resource.unlocked ? (
-                          <motion.button
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-white font-semibold text-sm truncate">
+                            {resource.title}
+                          </h4>
+                          <p className="text-xs text-gray-400">Course : {resource.courseTitle}</p>
+                          <p className="text-xs text-gray-500">Size : {resource.size} MB</p>
+                        </div>
+                      </div>
+
+                      {/* Action */}
+                      {resource.unlocked ? (
+                        <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           onClick={() => window.open(resource.fileUrl, "_blank")}
                           className="w-full py-2 rounded-lg bg-gradient-to-r from-green-400 to-emerald-500 text-white text-sm font-semibold flex items-center justify-center gap-2"
-                          >
-                            <Eye className="w-4 h-4" />
-                            View 
-                            {/* {console.log(resource)} */}
-                          </motion.button>
-                        ) : (
-                          <motion.button
+                        >
+                          <Eye className="w-4 h-4" />
+                          View / Download
+                        </motion.button>
+                      ) : (
+                        <motion.button
                           whileHover={{ scale: 1.03 }}
                           whileTap={{ scale: 0.97 }}
                           onClick={() => handleUnlockResource(resource)}
                           className="w-full py-2 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-sm font-bold flex items-center justify-center gap-2"
-                          >
-                            <Lock className="w-4 h-4" />
-                            Unlock for {resource.requiredCoins} coins
-                          </motion.button>
-                        )}
-                      </motion.div>
-                    );
-                  })}
-                </div>
-                </div>
+                        >
+                          <Lock className="w-4 h-4" />
+                          Unlock for {resource.requiredCoins} coins
+                        </motion.button>
+                      )}
+                    </motion.div>
+                  );
+                })}
               </div>
 
-              {/* Quick Stats */}
-              <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-                <h3 className="text-lg font-bold text-white mb-4">Quick Stats</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-blue-400/10 flex items-center justify-center">
-                        <BookOpen className="w-5 h-5 text-blue-400" />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-400">Enrolled Courses</div>
-                        <div className="text-xl font-bold text-white">{enrolledCoursesCount}</div>
-                      </div>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+              <h3 className="text-lg font-bold text-white mb-4">Quick Stats</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-400/10 flex items-center justify-center">
+                      <BookOpen className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-400">Enrolled Courses</div>
+                      <div className="text-xl font-bold text-white">{enrolledCoursesCount}</div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-green-400/10 flex items-center justify-center">
-                        <Award className="w-5 h-5 text-green-400" />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-400">Completed</div>
-                        <div className="text-xl font-bold text-white">{completedCourses}</div>
-                      </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-400/10 flex items-center justify-center">
+                      <Award className="w-5 h-5 text-green-400" />
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-400">Completed</div>
+                      <div className="text-xl font-bold text-white">{completedCourses}</div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-orange-400/10 flex items-center justify-center">
-                        <TrendingUp className="w-5 h-5 text-orange-400" />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-400">In Progress</div>
-                        <div className="text-xl font-bold text-white">{inProgressCourses}</div>
-                      </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-orange-400/10 flex items-center justify-center">
+                      <TrendingUp className="w-5 h-5 text-orange-400" />
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-400">In Progress</div>
+                      <div className="text-xl font-bold text-white">{enrolledCoursesCount - completedCourses}</div>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-purple-400/10 flex items-center justify-center">
-                        <Clock className="w-5 h-5 text-purple-400" />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-400">Learning Minutes</div>
-                        <div className="text-xl font-bold text-white">{learningTime}</div>
-                      </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-purple-400/10 flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-400">Learning Minutes</div>
+                      <div className="text-xl font-bold text-white">{learningTime}</div>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
           </motion.div>
         </div>
 
@@ -826,7 +937,6 @@ export default function LearnerDashboard() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                   <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
@@ -845,7 +955,7 @@ export default function LearnerDashboard() {
 
                   <div className="flex items-center justify-between text-sm text-gray-400 mb-4">
                     <div className="flex items-center gap-1">
-                      <BookOpenIcon className="w-4 h-4 text-yellow-400 " />
+                      <BookOpenIcon className="w-4 h-4 text-yellow-400" />
                       <span className="text-white font-medium">{course.lesson_length}</span>
                     </div>
                     <span>{course.enrolledCount} students</span>
@@ -869,6 +979,12 @@ export default function LearnerDashboard() {
           </div>
         </motion.div>
       </div>
+      {/* Certificate Modal */}
+      <CertificateModal
+        isOpen={showCertificate}
+        onClose={() => setShowCertificate(false)}
+        certificateData={certificateData}
+      />
     </div>
   );
 }

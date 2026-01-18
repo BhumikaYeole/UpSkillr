@@ -2,6 +2,7 @@ import { Award, Download, Share2, CheckCircle, Star, Trophy, Medal, Sparkles, Tr
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { verifyCertificateApi } from "../api/auth";
 
 export default function CertificatePage() {
   const [showVerifyModal, setShowVerifyModal] = useState(false);
@@ -41,42 +42,23 @@ export default function CertificatePage() {
       return;
     }
 
-    setTimeout(() => {
-      if (certificateId === "USK-2024-12345") {
-        setVerificationResult({
-          success: true,
+    setTimeout(async() => {
+      const res = await verifyCertificateApi(certificateId)
+      console.log(res)
+      
+      setVerificationResult({
+         success: true,
           message: "Certificate verified successfully!",
           details: {
-            name: "John Doe",
-            course: "Complete Web Development Bootcamp",
-            score: "95%",
-            date: "December 12, 2024",
-            instructor: "Sarah Johnson"
-          }
-        });
-      } else {
-        setVerificationResult({
-          success: false,
-          message: "Certificate not found. Please check the ID and try again."
-        });
-      }
+            name: res.name,
+            course: res.course,
+            score: res.score,
+            date: res.date,
+            instructor: res.instructor
+      }})
     }, 1000);
   };
 
-  // Function to navigate to courses page - you can customize this
-  const handleBrowseCourses = () => {
-    // Option 1: If using React Router
-    // navigate('/courses');
-    
-    // Option 2: If using window.location
-    // window.location.href = '/courses';
-    
-    // Option 3: If you have a parent component handling navigation
-    // Pass this as a prop and call it
-    
-    // For now, this will just alert - replace with your navigation logic
-    alert('Navigation to courses page - implement your routing here!');
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a1525] via-[#050b14] to-[#0f1a2a]">

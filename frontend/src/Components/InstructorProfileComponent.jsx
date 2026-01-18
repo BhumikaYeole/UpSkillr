@@ -59,7 +59,7 @@ export default function InstructorProfile() {
     const user = userResponse.profile?.user || userResponse.user || userResponse;
     const dashboard = dashboardResponse;
 
-    console.log(dashboard)
+    // console.log(dashboard)
     
     const mappedUserData = {
       name: user.name || "Instructor",

@@ -15,7 +15,9 @@ import Login from './pages/Login';
 import CreateCourse from "./pages/CreateCourse"
 import EditCourse from './pages/EditCourse';
 import ProtectedRoute from './Components/ProtectedRoute';
-
+import CourseAssessment from './pages/CourseAssessment';
+import CreateCourseForm from './Components/CreateCourseForm';
+import CreateAssessmentUI from './Components/CreateAssessmentUI';
 
 function App() {
   return (
@@ -28,6 +30,9 @@ function App() {
           <Route path="/certificates" element={<CertificatePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/teach" element={<TeachPage />} />
+          <Route path="/instructor/create-course" element={<CreateCourseForm />} />
+          <Route path="/instructor/create-assessment" element={<CreateAssessmentUI />} />
+          
           <Route
             path="/learner-dashboard"
             element={
@@ -36,6 +41,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          
           <Route
             path="/create-course"
             element={
@@ -44,6 +50,16 @@ function App() {
               </ProtectedRoute>
             }
           />
+          
+          <Route
+           path="/instructor/create-course" 
+           element={
+            <ProtectedRoute role="instructor">
+              <CreateCourse />
+            </ProtectedRoute>
+          } 
+          />
+          
           <Route
             path="/course/:courseId/edit"
             element={
@@ -53,23 +69,44 @@ function App() {
             }
           />
 
-          <Route path="/instructor-dashboard" element={
+          <Route 
+            path="/instructor-dashboard" 
+            element={
               <ProtectedRoute role="instructor">
                 <InstructorDashboard />
               </ProtectedRoute>
-            } />
-          <Route path="/learner-profile" element={
-            <ProtectedRoute role="learner">
+            } 
+          />
+          
+          <Route 
+            path="/learner-profile" 
+            element={
+              <ProtectedRoute role="learner">
                 <LearnerProfile />
               </ProtectedRoute>
-            } />
-          <Route path="/instructor-profile" element={
+            } 
+          />
+          
+          <Route 
+            path="/instructor-profile" 
+            element={
               <ProtectedRoute role="instructor">
                 <InstructorProfile />
               </ProtectedRoute>
-            } />
+            } 
+          />
+          
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
+          
+          <Route 
+            path="/courses/:courseId/assessment" 
+            element={
+              <ProtectedRoute role="learner">
+                <CourseAssessment />
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
       </Layout>
     </Router>
