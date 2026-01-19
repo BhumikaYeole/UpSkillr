@@ -1,4 +1,4 @@
-const BASE_URL = "https://upskillr-mzox.onrender.com/api";
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export async function fetchClient(
   endpoint,

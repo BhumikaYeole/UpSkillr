@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 const TOTAL_TIME = 15 * 60; // 15 minutes
-const API_BASE_URL = "https://upskillr-mzox.onrender.com/api"; // Change to your backend URL
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export default function Quiz({ courseId }) { 
   const [assessmentData, setAssessmentData] = useState(null);

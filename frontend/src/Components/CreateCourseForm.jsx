@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 
-const API_BASE_URL = 'https://upskillr-mzox.onrender.com/api';
+const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export default function CreateCourseForm() {
   const [courseData, setCourseData] = useState({

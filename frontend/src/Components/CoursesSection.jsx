@@ -5,7 +5,7 @@ import { Clock, Users, BookOpen } from "lucide-react";
 
 export default function CoursesSection() {
   const [courses, setCourses] = useState([]);
-  const BASE_URL = "https://upskillr-mzox.onrender.com/api";
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
 
   useEffect(() => {
     const fetchCourses = async () => {
