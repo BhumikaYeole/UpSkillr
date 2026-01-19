@@ -1,13 +1,13 @@
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { DollarSign, Globe, Zap, ArrowRight, Users, BookOpen, Award } from "lucide-react";
+import { DollarSign, Globe, Zap, ArrowRight, Users, BookOpen, Award, Shield } from "lucide-react";
 
 export default function BecomeInstructorSection() {
   const features = [
     {
-      icon: <DollarSign className="w-6 h-6" />,
-      title: "Earn Income",
-      description: "Set your own prices and earn revenue from every enrollment",
+      icon: <Shield className="w-6 h-6" />,
+      title: "Secure Platform",
+      description: "Your content is protected. We handle all the technical aspects.",
       gradient: "from-yellow-400 to-orange-500"
     },
     {

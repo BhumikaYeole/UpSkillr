@@ -153,6 +153,7 @@ export default function HeroSection() {
           <motion.button
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
+            onClick={()=> window.location.href = "/signup"}
             className="px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-400 to-cyan-500 text-[#050b14] font-semibold shadow-lg shadow-cyan-400/25 hover:shadow-xl hover:shadow-cyan-400/40 transition-all duration-300 flex items-center justify-center gap-2"
           >
             Start Learning Free

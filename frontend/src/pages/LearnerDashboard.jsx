@@ -271,12 +271,7 @@ export default function LearnerDashboard() {
       coins: 10,
       gradient: "from-orange-400 to-red-500"
     },
-    {
-      icon: <Sparkles className="w-5 h-5" />,
-      title: "Daily Login",
-      coins: 25,
-      gradient: "from-yellow-400 to-orange-500"
-    }
+    
   ];
 
   const handleUnlockResource = async (resourceId) => {

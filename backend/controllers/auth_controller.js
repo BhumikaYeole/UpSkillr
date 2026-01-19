@@ -39,6 +39,12 @@ export const signUpLearner = async (req, res, next) => {
       { expiresIn: JWT_EXPIRES_IN }
     );
 
+    res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+  });
+
     res.status(201).json({
       success: true,
       message: "Learner registered successfully",
@@ -86,6 +92,12 @@ export const signUpInstructor = async (req, res, next) => {
       { expiresIn: JWT_EXPIRES_IN }
     );
 
+    res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+  });
+
     res.status(201).json({
       success: true,
       message: "Instructor registered successfully",
@@ -126,6 +138,12 @@ export const signIn = async (req, res, next) => {
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
     );
+    
+    res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+  });
 
     res.status(200).json({
       success: true,
