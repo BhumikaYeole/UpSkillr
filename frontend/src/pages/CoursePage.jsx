@@ -20,7 +20,7 @@ export default function CoursesPage() {
   const [showLevelDropdown, setShowLevelDropdown] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
 
-  const BASE_URL = "http://localhost:5000/api";
+  const BASE_URL = "https://upskillr-mzox.onrender.com/api";
 
   useEffect(() => {
     window.scrollTo(0, 0);

@@ -162,7 +162,7 @@ export default function HeroSection() {
           <motion.button
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank')}
+            onClick={() => window.open('https://drive.google.com/file/d/1z4DNlAIWj8uDIbKXV904hZRx_JEy5S0Q/view?pli=1', '_blank')}
             className="px-8 py-4 rounded-2xl border border-white/20 bg-white/5 backdrop-blur-sm hover:bg-white/10 hover:border-white/30 transition-all duration-300 flex items-center justify-center gap-2 font-semibold"
           >
             <Play size={18} className="fill-current" />
