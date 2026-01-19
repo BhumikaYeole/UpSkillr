@@ -512,10 +512,6 @@ export default function CertificatePage() {
               >
                 Verify Now
               </motion.button>
-
-              <p className="text-xs text-gray-500 text-center mt-4">
-                Try with ID: USK-2024-12345
-              </p>
             </motion.div>
           </motion.div>
         )}

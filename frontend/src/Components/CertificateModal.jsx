@@ -14,7 +14,7 @@ export default function CertificateModal({ isOpen, onClose, certificateData }) {
     setLoading(true);
     try {
       const element = certificateRef.current;
-      
+
       const canvas = await html2canvas(element, {
         scale: 2,
         backgroundColor: null,
@@ -43,9 +43,19 @@ export default function CertificateModal({ isOpen, onClose, certificateData }) {
   };
 
   const handleShareLinkedIn = () => {
-    const text = `I'm proud to share that I've completed ${certificateData.courseTitle} with ${certificateData.status}!`;
-    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`;
-    window.open(url, '_blank');
+    const text = `I'm proud to share that I've completed ${certificateData.courseTitle} with a score of ${certificateData.score}%! 🎓\n\nCertificate ID: ${certificateData.certificateId}\nIssued: ${certificateData.dateIssued}`;
+    
+    const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent('https://www.linkedin.com')}`;
+    
+    // Copy certificate details to clipboard for easy pasting
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Certificate details copied to clipboard! You can paste them into your LinkedIn post.');
+      window.open(linkedInUrl, '_blank');
+    }).catch(() => {
+
+      window.open(linkedInUrl, '_blank');
+      alert('Please share your achievement on LinkedIn! Certificate details:\n\n' + text);
+    });
   };
 
   return (
@@ -75,103 +85,86 @@ export default function CertificateModal({ isOpen, onClose, certificateData }) {
             </button>
 
             {/* Certificate */}
-            <div 
+            <div
               ref={certificateRef}
-              className="relative bg-gradient-to-br from-slate-800 to-slate-700 rounded-3xl p-16 shadow-2xl border-2 border-cyan-500/30"
+              className="relative bg-white p-16 shadow-2xl border-[12px] border-[#d4af37] rounded-md max-w-5xl mx-auto"
             >
-              {/* Corner Decorations */}
-              <div className="absolute top-8 left-8 w-20 h-20 border-l-2 border-t-2 border-cyan-400/40 rounded-tl-xl"></div>
-              <div className="absolute top-8 right-8 w-20 h-20 border-r-2 border-t-2 border-cyan-400/40 rounded-tr-xl"></div>
-              <div className="absolute bottom-8 left-8 w-20 h-20 border-l-2 border-b-2 border-cyan-400/40 rounded-bl-xl"></div>
-              <div className="absolute bottom-8 right-8 w-20 h-20 border-r-2 border-b-2 border-cyan-400/40 rounded-br-xl"></div>
-              
-              {/* Success Badge */}
-              <div className="absolute top-6 right-6 w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg shadow-green-500/50">
-                <Check className="w-7 h-7 text-white" strokeWidth={3} />
+              {/* Inner Border */}
+              <div className="absolute inset-4 border-2 border-[#d4af37] pointer-events-none"></div>
+
+              {/* Gold Seal */}
+              <div className="absolute top-10 right-10 w-24 h-24 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-xl">
+                <Award className="w-10 h-10 text-white" />
               </div>
 
-              {/* Decorative Icons */}
-              <div className="absolute bottom-12 left-20 text-cyan-500/20">
-                <Award className="w-8 h-8" />
+              {/* Header */}
+              <div className="text-center mb-10">
+                <h1 className="text-4xl font-serif tracking-widest text-gray-800">
+                  CERTIFICATE
+                </h1>
+                <p className="text-lg tracking-[0.3em] text-gray-500 mt-1">
+                  OF COMPLETION
+                </p>
               </div>
-              <div className="absolute top-32 right-24 text-cyan-500/20">
-                <TrendingUp className="w-6 h-6" />
+
+              {/* Body */}
+              <div className="text-center space-y-6 px-10">
+                <p className="text-gray-600 text-lg uppercase tracking-wide">
+                  This Certificate is Presented To
+                </p>
+
+                <h2 className="text-5xl font-[cursive] text-[#d4af37]">
+                  {certificateData.learnerName}
+                </h2>
+
+                <div className="w-40 h-[2px] bg-[#d4af37] mx-auto"></div>
+
+                <p className="text-gray-700 text-lg leading-relaxed max-w-3xl mx-auto">
+                  In recognition of successfully completing the course
+                </p>
+
+                <h3 className="text-2xl font-semibold text-gray-900">
+                  {certificateData.courseTitle}
+                </h3>
+
+                <p className="text-gray-600 text-md">
+                  with a score of <span className="font-semibold">{certificateData.score}%</span>
+                </p>
               </div>
 
-              {/* Main Content */}
-              <div className="text-center space-y-6">
-                {/* Icon */}
-                <div className="flex justify-center mb-8">
-                  <div className="w-20 h-20 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center shadow-lg shadow-cyan-500/50">
-                    <Award className="w-10 h-10 text-white" strokeWidth={2.5} />
-                  </div>
+              {/* Footer */}
+              <div className="mt-16 grid grid-cols-3 gap-10 text-center items-end px-10">
+                {/* Signature */}
+                <div>
+                  <div className="h-12 mb-2 border-b border-gray-400"></div>
+                  <p className="font-semibold text-gray-800">
+                    {certificateData.instructorName}
+                  </p>
+                  <p className="text-sm text-gray-500">Instructor</p>
                 </div>
 
-                {/* Header */}
-                <div className="space-y-2">
-                  <p className="text-gray-400 text-sm tracking-[0.3em] uppercase font-light">
-                    Certificate of Completion
+                {/* Date */}
+                <div>
+                  <p className="font-semibold text-gray-800">
+                    {certificateData.dateIssued}
                   </p>
-                  <h1 className="text-5xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                    UpSkillr Academy
-                  </h1>
-                  <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent mx-auto"></div>
+                  <p className="text-sm text-gray-500">Date Issued</p>
                 </div>
 
-                {/* Body */}
-                <div className="space-y-6 py-8">
-                  <p className="text-gray-300 text-lg">
-                    This is to certify that
+                {/* Certificate ID */}
+                <div>
+                  <p className="font-semibold text-gray-800">
+                    {certificateData.certificateId}
                   </p>
-                  
-                  <h2 className="text-5xl font-bold text-white">
-                    {certificateData.learnerName}
-                  </h2>
-                  
-                  <p className="text-gray-300 text-lg">
-                    has successfully completed the course
-                  </p>
-                  
-                  <h3 className="text-3xl font-semibold text-cyan-400">
-                    "{certificateData.courseTitle}"
-                  </h3>
-
-                  {/* Score Badge */}
-                  <div className="inline-block">
-                    <div className="border-2 border-cyan-500/40 rounded-full px-8 py-3 bg-slate-800/50 backdrop-blur-sm">
-                      <p className="text-cyan-400 font-semibold flex items-center gap-2">
-                        <span className="text-xl">Score: {certificateData.score}%</span>
-                        <span className="text-gray-400">–</span>
-                        <span className="text-xl">{certificateData.status}</span>
-                        <Award className="w-5 h-5 text-cyan-400" />
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer Info */}
-                <div className="border-t border-gray-600/30 pt-8 mt-12">
-                  <div className="grid grid-cols-3 gap-8 text-center max-w-3xl mx-auto">
-                    <div className="space-y-1">
-                      <p className="text-gray-500 text-xs uppercase tracking-wider">Instructor</p>
-                      <p className="text-white font-semibold">{certificateData.instructorName}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-gray-500 text-xs uppercase tracking-wider">Date Issued</p>
-                      <p className="text-white font-semibold">{certificateData.dateIssued}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-gray-500 text-xs uppercase tracking-wider">Certificate ID</p>
-                      <p className="text-white font-semibold">{certificateData.certificateId}</p>
-                    </div>
-                  </div>
+                  <p className="text-sm text-gray-500">Certificate ID</p>
                 </div>
               </div>
             </div>
 
+
             {/* Action Buttons */}
             <div className="flex gap-4 mt-8 justify-center">
-              <button 
+              <button
                 onClick={handleDownloadPDF}
                 disabled={loading}
                 className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl font-semibold shadow-lg shadow-cyan-500/50 hover:shadow-cyan-500/70 transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -179,7 +172,7 @@ export default function CertificateModal({ isOpen, onClose, certificateData }) {
                 <Download className="w-5 h-5" />
                 {loading ? 'Generating...' : 'Download Certificate'}
               </button>
-              <button 
+              <button
                 onClick={handleShareLinkedIn}
                 className="flex items-center gap-2 px-8 py-4 bg-slate-700 text-white rounded-xl font-semibold border-2 border-slate-600 hover:bg-slate-600 transition-all hover:scale-105"
               >
